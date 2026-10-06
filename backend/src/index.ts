@@ -1,0 +1,1 @@
+console.log('ReportaYa backend: base minima preparada para una siguiente etapa.')

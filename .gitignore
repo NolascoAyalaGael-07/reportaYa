@@ -18,6 +18,27 @@
 mono_crash.*
 
 # Build results
+[Bb]uild/
+[Dd]ist/
+node_modules/
+
+# Node.js, React, Vite and TypeScript
+[Nn]pm-debug.log*
+[Yy]arn-debug.log*
+[Yy]arn-error.log*
+[Pp]npm-debug.log*
+.npm/
+**/.vite/
+**/.cache/
+**/coverage/
+*.tsbuildinfo
+
+# Environment files
+*.env
+.env.*
+!.env.example
+
+# Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
