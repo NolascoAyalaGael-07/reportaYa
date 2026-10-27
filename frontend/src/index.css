@@ -501,6 +501,393 @@ select:focus-visible {
 }
 
 @media (max-width: 430px) {
+  .ry-register-card {
+    min-height: 100vh;
+  }
+}
+
+.ry-app-shell {
+  min-height: 100vh;
+  padding-bottom: 88px;
+  background: #f4f7fb;
+}
+
+.ry-app-header {
+  position: sticky;
+  z-index: 5;
+  top: 0;
+  border-bottom: 1px solid #e8eef5;
+  background: #ffffffed;
+  backdrop-filter: blur(12px);
+}
+
+.ry-app-header-inner,
+.ry-home-main {
+  width: min(100% - 40px, 900px);
+  margin: 0 auto;
+}
+
+.ry-app-header-inner {
+  display: flex;
+  min-height: 68px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ry-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  color: var(--ry-blue);
+  border: 0;
+  border-radius: 50%;
+  background: #e8f2ff;
+  font-weight: 700;
+  place-items: center;
+}
+
+.ry-avatar--small {
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.ry-home-main {
+  padding-top: 24px;
+}
+
+.ry-overline {
+  margin: 0 0 5px;
+  color: #7690ad;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ry-greeting h1,
+.ry-section-title-row h1 {
+  margin: 0;
+  color: var(--ry-ink);
+  font-size: 26px;
+  letter-spacing: -0.5px;
+}
+
+.ry-greeting > p:last-child,
+.ry-home-subtitle {
+  margin: 4px 0 0;
+  color: var(--ry-muted);
+  font-size: 12px;
+}
+
+.ry-create-banner {
+  display: flex;
+  width: 100%;
+  min-height: 96px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 17px;
+  padding: 16px 18px;
+  color: #fff;
+  border: 0;
+  border-radius: 16px;
+  background: linear-gradient(110deg, #0b69d4, #075abf);
+  box-shadow: 0 8px 18px #0b69d41c;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ry-create-banner-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.ry-create-banner-copy strong {
+  font-size: 17px;
+}
+
+.ry-create-banner-copy > span {
+  color: #deedff;
+  font-size: 12px;
+}
+
+.ry-create-banner-copy small {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  color: #d3e6ff;
+  font-size: 10px;
+}
+
+.ry-create-plus {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  color: var(--ry-blue);
+  border-radius: 12px;
+  background: #fff;
+  place-items: center;
+}
+
+.ry-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.ry-stat-card {
+  display: grid;
+  min-height: 68px;
+  align-content: center;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid #e0e8f1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.ry-stat-card strong {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ry-stat-card > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #7790aa;
+  font-size: 10px;
+}
+
+.ry-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.ry-dot--pending {
+  background: #f49b4a;
+}
+
+.ry-dot--progress {
+  background: #1672d9;
+}
+
+.ry-dot--resolved {
+  background: #399c87;
+}
+
+.ry-report-list-section {
+  margin-top: 23px;
+}
+
+.ry-section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ry-section-title-row h2 {
+  margin: 0;
+  font-size: 17px;
+  letter-spacing: -0.2px;
+}
+
+.ry-text-button {
+  padding: 4px;
+  color: #8294aa;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+}
+
+.ry-report-list {
+  display: grid;
+  gap: 9px;
+  margin-top: 11px;
+}
+
+.ry-report-card {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid #e0e8f1;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.ry-report-icon {
+  display: grid;
+  width: 37px;
+  height: 37px;
+  flex: 0 0 auto;
+  color: #2781e8;
+  border-radius: 11px;
+  background: #eff6ff;
+  place-items: center;
+}
+
+.ry-report-details {
+  min-width: 0;
+  flex: 1;
+}
+
+.ry-report-heading,
+.ry-report-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ry-report-heading h3 {
+  overflow: hidden;
+  margin: 0;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ry-report-heading p {
+  overflow: hidden;
+  margin: 3px 0 0;
+  color: var(--ry-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ry-report-heading > svg {
+  flex: 0 0 auto;
+  color: #96a9bf;
+}
+
+.ry-report-meta {
+  margin-top: 9px;
+  color: #8294aa;
+  font-size: 10px;
+}
+
+.ry-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  border-radius: 20px;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ry-status--pendiente {
+  color: #c97a28;
+  background: #fff2df;
+}
+
+.ry-status--en-atención {
+  color: #176cc8;
+  background: #eaf3ff;
+}
+
+.ry-status--solucionado {
+  color: #258875;
+  background: #e8f6f1;
+}
+
+.ry-empty-state {
+  margin: 0;
+  padding: 22px;
+  color: var(--ry-muted);
+  border: 1px dashed var(--ry-line);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 13px;
+  text-align: center;
+}
+
+.ry-new-report-compact {
+  min-height: 38px;
+  padding: 8px 11px;
+  font-size: 11px;
+}
+
+.ry-bottom-nav {
+  position: fixed;
+  z-index: 6;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  min-height: 70px;
+  padding: 6px max(16px, calc((100vw - 600px) / 2));
+  border-top: 1px solid #e4ebf3;
+  background: #ffffffed;
+  backdrop-filter: blur(12px);
+}
+
+.ry-bottom-nav button {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  justify-items: center;
+  gap: 3px;
+  padding: 5px;
+  color: #8a9aaf;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.ry-bottom-nav button.is-active {
+  color: var(--ry-blue);
+  background: #eaf3ff;
+}
+
+@media (min-width: 760px) {
+  .ry-home-main {
+    padding-top: 34px;
+  }
+
+  .ry-create-banner {
+    min-height: 112px;
+  }
+
+  .ry-stat-grid {
+    max-width: 560px;
+  }
+
+  .ry-report-list {
+    gap: 11px;
+  }
+
+  .ry-report-card {
+    padding: 15px 17px;
+  }
+}
+
+@media (max-width: 430px) {
+  .ry-app-header-inner,
+  .ry-home-main {
+    width: calc(100% - 40px);
+  }
+
+  .ry-home-main {
+    padding-top: 20px;
+  }
+
+  .ry-create-banner-copy strong {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 430px) {
   .ry-auth-layout {
     padding: 0;
     background: #fff;
