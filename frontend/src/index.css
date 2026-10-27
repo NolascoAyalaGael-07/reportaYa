@@ -417,3 +417,99 @@ select:focus-visible {
 .ry-auth-footer strong {
   font-weight: 600;
 }
+
+.ry-register-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ry-back-button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  color: #73869d;
+  border: 1px solid var(--ry-line);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  place-items: center;
+}
+
+.ry-register-content {
+  padding-top: 21px;
+}
+
+.ry-register-content h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+
+.ry-role-banner {
+  display: flex;
+  min-height: 39px;
+  align-items: center;
+  gap: 9px;
+  margin-top: 15px;
+  padding: 8px 11px;
+  color: var(--ry-blue);
+  border-radius: 10px;
+  background: var(--ry-blue-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ry-register-content .ry-form {
+  gap: 5px;
+  margin-top: 13px;
+}
+
+.ry-register-content .ry-form label {
+  margin-top: 5px;
+}
+
+.ry-field-hint {
+  margin-top: -1px;
+  color: var(--ry-muted);
+  font-size: 10px;
+}
+
+.ry-form-message {
+  margin: 4px 0 0;
+  color: #b42318;
+  font-size: 12px;
+}
+
+.ry-register-login {
+  margin-top: 14px !important;
+  text-align: center;
+  font-size: 12px !important;
+}
+
+.ry-register-login button {
+  padding: 0;
+  color: var(--ry-blue);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.ry-register-content .ry-auth-note {
+  margin-top: 7px !important;
+}
+
+@media (max-width: 430px) {
+  .ry-auth-layout {
+    padding: 0;
+    background: #fff;
+  }
+
+  .ry-auth-card {
+    min-height: 100vh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
