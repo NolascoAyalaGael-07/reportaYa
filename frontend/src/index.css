@@ -1072,6 +1072,325 @@ select:focus-visible {
   }
 }
 
+.ry-report-shell {
+  padding-bottom: 90px;
+  background: #f3f7fc;
+}
+
+.ry-create-main {
+  width: min(100% - 36px, 820px);
+  margin: 0 auto;
+  padding: 18px 0 24px;
+}
+
+.ry-create-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.ry-create-back {
+  display: grid;
+  width: 31px;
+  height: 34px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  padding: 3px;
+  color: var(--ry-blue);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  place-items: center;
+}
+
+.ry-create-heading h1 {
+  margin: 0;
+  font-size: 23px;
+  letter-spacing: -0.5px;
+}
+
+.ry-create-heading p {
+  max-width: 560px;
+  margin: 3px 0 0;
+  color: #8297b0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ry-create-form {
+  display: grid;
+  gap: 11px;
+}
+
+.ry-photo-preview {
+  position: relative;
+  display: grid;
+  min-height: 132px;
+  overflow: hidden;
+  border: 1px solid #e1eaf4;
+  border-radius: 14px;
+  background: linear-gradient(140deg, #e8f2fd, #f8fbff);
+  place-items: center;
+}
+
+.ry-photo-preview img {
+  display: block;
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+}
+
+.ry-photo-placeholder {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  padding: 20px;
+  color: #70a6e3;
+  text-align: center;
+}
+
+.ry-photo-placeholder strong {
+  color: #4a6b91;
+  font-size: 12px;
+}
+
+.ry-photo-placeholder span {
+  color: #8ca1b8;
+  font-size: 10px;
+}
+
+.ry-photo-remove {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  width: 33px;
+  height: 33px;
+  color: #da5361;
+  border: 1px solid #f1dce0;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  place-items: center;
+}
+
+.ry-photo-change {
+  display: grid;
+  min-height: 45px;
+  grid-template-columns: auto auto;
+  align-content: center;
+  justify-content: center;
+  align-items: center;
+  column-gap: 7px;
+  padding: 7px;
+  color: var(--ry-blue);
+  border: 1px solid #e4edf7;
+  border-radius: 11px;
+  background: #edf5ff;
+  cursor: pointer;
+}
+
+.ry-photo-change input,
+.ry-upload-card input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.ry-photo-change strong {
+  font-size: 11px;
+}
+
+.ry-photo-change span {
+  grid-column: 2;
+  color: #849ab4;
+  font-size: 9px;
+}
+
+.ry-photo-error {
+  margin: -4px 0 0;
+  color: #b42318;
+  font-size: 11px;
+}
+
+.ry-create-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.ry-field-card {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e0e9f4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.ry-field-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--ry-blue);
+}
+
+.ry-field-title > svg {
+  flex: 0 0 auto;
+}
+
+.ry-field-title > span {
+  display: grid;
+  gap: 3px;
+  color: var(--ry-ink);
+}
+
+.ry-field-title strong {
+  font-size: 11px;
+}
+
+.ry-field-title small {
+  color: #8a9eb6;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.ry-field-card > select,
+.ry-field-card > input,
+.ry-status-select {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  align-items: center;
+  padding: 0 10px;
+  color: #355575;
+  border: 1px solid #dfe8f3;
+  border-radius: 9px;
+  background: #fbfdff;
+  font-size: 11px;
+}
+
+.ry-field-card > select,
+.ry-status-select select {
+  cursor: pointer;
+}
+
+.ry-field-card > input::placeholder,
+.ry-field-card textarea::placeholder {
+  color: #99aabe;
+}
+
+.ry-description-card textarea {
+  width: 100%;
+  min-height: 76px;
+  resize: vertical;
+  padding: 9px 10px;
+  color: #355575;
+  border: 1px solid #dfe8f3;
+  border-radius: 9px;
+  background: #fbfdff;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ry-character-count {
+  margin-top: -7px;
+  color: #91a4ba;
+  font-size: 9px;
+  text-align: right;
+}
+
+.ry-create-bottom-grid {
+  align-items: stretch;
+}
+
+.ry-upload-inner {
+  display: grid;
+  min-height: 78px;
+  align-content: center;
+  justify-items: center;
+  gap: 4px;
+  color: var(--ry-blue);
+  border: 1px dashed #c9dcf2;
+  border-radius: 9px;
+  background: #f9fcff;
+  font-size: 10px;
+}
+
+.ry-upload-inner small {
+  color: #8a9eb6;
+  font-size: 9px;
+}
+
+.ry-upload-card {
+  cursor: pointer;
+}
+
+.ry-status-select {
+  gap: 7px;
+}
+
+.ry-status-select select {
+  width: 100%;
+  height: 35px;
+  color: #355575;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 11px;
+}
+
+.ry-status-help {
+  color: #8a9eb6;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+.ry-submit-report {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 10px;
+}
+
+.ry-submit-report svg {
+  transform: rotate(-35deg);
+}
+
+@media (min-width: 760px) {
+  .ry-create-main {
+    padding-top: 20px;
+  }
+
+  .ry-create-heading h1 {
+    font-size: 24px;
+  }
+
+  .ry-photo-preview {
+    min-height: 180px;
+  }
+
+  .ry-field-card {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 540px) {
+  .ry-create-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ry-create-main {
+    width: calc(100% - 28px);
+  }
+}
+
 @media (max-width: 430px) {
   .ry-auth-layout {
     padding: 0;
