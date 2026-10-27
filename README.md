@@ -30,6 +30,10 @@ npm start
 
 ## Alcance actual
 
-La pantalla permite recorrer una presentacion local de reportes de ejemplo, filtrar su estado y abrir un formulario de creacion. El formulario solo muestra una confirmacion en pantalla: no guarda datos, no usa una base de datos y no se conecta a servicios reales.
+### Avance de interfaz
 
-Los reportes visibles y sus fechas son ficticios. La maqueta no define todavia instituciones, ubicaciones, categorias, reglas de negocio ni campos derivados de los diagramas de analisis. Esos detalles quedan pendientes para una siguiente etapa.
+El frontend ofrece las pantallas de inicio de sesi?n, registro, inicio, reportes, configuraci?n y creaci?n de reportes. Desde el inicio de sesi?n puedes usar cualquier correo v?lido y una contrase?a no vac?a para entrar a la demostraci?n; el registro tambi?n es local. Los reportes creados y la cuenta solo se mantienen en memoria mientras la aplicaci?n est? abierta. No se guardan contrase?as ni se autentica contra el backend o una base de datos.
+
+La interfaz permite recorrer los reportes de ejemplo y crear otros desde un formulario. El inicio de sesi?n y el registro son demostraciones locales; las cuentas y los reportes nuevos solo viven en memoria y no se conectan con SQL Server.
+
+Los reportes y los datos del perfil son ficticios. Las cuentas y los reportes nuevos solo viven en memoria y se pierden al recargar; no hay autenticaci?n real, persistencia ni conexi?n con servicios o base de datos. Las categor?as y ubicaciones son opciones de demostraci?n, no cat?logos conectados a la base de datos.

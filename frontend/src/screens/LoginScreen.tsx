@@ -49,7 +49,7 @@ export function LoginScreen({ onLogin, onRegister }: LoginScreenProps) {
           </form>
           <div className="ry-divider"><span>¿Aún no tienes cuenta?</span></div>
           <button className="ry-button ry-button--outline ry-auth-register" onClick={onRegister} type="button">Crear una cuenta <Icon name="user" /></button>
-          <p className="ry-auth-note">Prototipo académico: el acceso es una demostración local.</p>
+          <p className="ry-auth-note">Demostración local: usa cualquier correo válido y una contraseña. No se guarda ningún dato.</p>
         </div>
         <footer className="ry-auth-footer"><strong>Instituto Tecnológico de Tijuana</strong><span>Prototipo académico · Comunidad estudiantil</span></footer>
       </section>
