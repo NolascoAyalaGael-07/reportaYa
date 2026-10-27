@@ -850,6 +850,10 @@ select:focus-visible {
   background: #eaf3ff;
 }
 
+.ry-bottom-nav--four {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 @media (min-width: 760px) {
   .ry-home-main {
     padding-top: 34px;
@@ -884,6 +888,187 @@ select:focus-visible {
 
   .ry-create-banner-copy strong {
     font-size: 16px;
+  }
+}
+
+.ry-settings-main {
+  width: min(100% - 40px, 900px);
+  margin: 0 auto;
+  padding: 23px 0 34px;
+}
+
+.ry-settings-intro h1 {
+  margin: 0;
+  font-size: 25px;
+  letter-spacing: -0.5px;
+}
+
+.ry-settings-intro > p:last-child {
+  max-width: 420px;
+  margin: 4px 0 16px;
+  color: var(--ry-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ry-profile-card {
+  display: flex;
+  width: 100%;
+  min-height: 90px;
+  align-items: center;
+  gap: 13px;
+  padding: 13px;
+  color: var(--ry-ink);
+  border: 1px solid #dfe9f4;
+  border-radius: 15px;
+  background: linear-gradient(110deg, #f8fbff, #fff);
+  cursor: pointer;
+  text-align: left;
+}
+
+.ry-avatar--large {
+  width: 52px;
+  height: 52px;
+  font-size: 16px;
+}
+
+.ry-profile-copy,
+.ry-setting-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 4px;
+}
+
+.ry-profile-copy strong {
+  font-size: 13px;
+}
+
+.ry-profile-copy > small {
+  overflow: hidden;
+  color: #8294aa;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ry-profile-card > svg:last-child,
+.ry-setting-row > svg:last-child {
+  flex: 0 0 auto;
+  color: #8ba3bc;
+  transition: transform 150ms ease;
+}
+
+.ry-profile-card[aria-expanded="true"] > svg:last-child,
+.ry-setting-row[aria-expanded="true"] > svg:last-child {
+  transform: rotate(90deg);
+}
+
+.ry-role-pill {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 7px;
+  color: var(--ry-blue);
+  border-radius: 20px;
+  background: #e8f2ff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.ry-settings-groups {
+  display: grid;
+  gap: 13px;
+  margin-top: 16px;
+}
+
+.ry-settings-group h2 {
+  margin: 0 0 6px;
+  color: #244b76;
+  font-size: 13px;
+}
+
+.ry-setting-wrap {
+  overflow: hidden;
+  border: 1px solid #e0e9f4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.ry-setting-row {
+  display: flex;
+  width: 100%;
+  min-height: 56px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  color: var(--ry-ink);
+  border: 1px solid #e0e9f4;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ry-setting-wrap .ry-setting-row {
+  border: 0;
+  border-radius: 0;
+}
+
+.ry-setting-icon {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  color: #2781e8;
+  border-radius: 10px;
+  background: #eff6ff;
+  place-items: center;
+}
+
+.ry-setting-icon--logout {
+  color: #e94e63;
+  background: #fff0f2;
+}
+
+.ry-setting-copy strong {
+  font-size: 11px;
+}
+
+.ry-setting-copy small {
+  color: #8294aa;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.ry-setting-detail {
+  margin: 0;
+  padding: 0 13px 12px 53px;
+  color: #71859d;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ry-profile-detail {
+  padding: 9px 13px;
+}
+
+@media (min-width: 760px) {
+  .ry-settings-main {
+    padding-top: 29px;
+  }
+
+  .ry-settings-groups {
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+    column-gap: 14px;
+    row-gap: 17px;
+  }
+
+  .ry-settings-group:first-child,
+  .ry-settings-group:last-child {
+    grid-column: 1 / -1;
   }
 }
 
