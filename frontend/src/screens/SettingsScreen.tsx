@@ -4,7 +4,7 @@ import type { Student } from './reportTypes'
 
 type SettingsScreenProps = {
   student: Student
-  onLogout: () => void
+  onLogout: () => Promise<void>
   onOpenHome: () => void
   onOpenReports: () => void
   onCreateReport: () => void
@@ -73,6 +73,20 @@ export function SettingsScreen({
   onCreateReport,
 }: SettingsScreenProps) {
   const [expandedItem, setExpandedItem] = useState<string | null>(null)
+  const [logoutError, setLogoutError] = useState('')
+  const [loggingOut, setLoggingOut] = useState(false)
+
+  async function handleLogout() {
+    setLoggingOut(true)
+    setLogoutError('')
+    try {
+      await onLogout()
+    } catch (error) {
+      setLogoutError(error instanceof Error ? error.message : 'No se pudo cerrar sesión. Inténtalo de nuevo.')
+    } finally {
+      setLoggingOut(false)
+    }
+  }
 
   return (
     <div className="ry-app-shell">
@@ -115,9 +129,9 @@ export function SettingsScreen({
           ))}
           <section className="ry-settings-group">
             <h2>Cerrar sesión</h2>
-            <button className="ry-setting-row" onClick={onLogout} type="button">
+            <button className="ry-setting-row" disabled={loggingOut} onClick={() => void handleLogout()} type="button">
               <span className="ry-setting-icon ry-setting-icon--logout"><Icon name="logout" size={19} /></span>
-              <span className="ry-setting-copy"><strong>Cerrar sesión</strong><small>Sal de tu cuenta de forma segura.</small></span>
+              <span className="ry-setting-copy"><strong>{loggingOut ? 'Cerrando sesión…' : 'Cerrar sesión'}</strong><small>{logoutError || 'Sal de tu cuenta de forma segura.'}</small></span>
               <Icon name="chevron" size={18} />
             </button>
           </section>

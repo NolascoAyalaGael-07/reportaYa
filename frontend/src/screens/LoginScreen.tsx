@@ -2,17 +2,28 @@ import { FormEvent, useState } from 'react'
 import { Brand, Icon } from '../components/Brand'
 
 type LoginScreenProps = {
-  onLogin: (email: string, password: string) => void
+  onLogin: (email: string, password: string) => Promise<void>
   onRegister: () => void
+  initialError?: string
 }
 
-export function LoginScreen({ onLogin, onRegister }: LoginScreenProps) {
+export function LoginScreen({ onLogin, onRegister, initialError }: LoginScreenProps) {
   const [passwordVisible, setPasswordVisible] = useState(false)
+  const [message, setMessage] = useState(initialError ?? '')
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setMessage('')
+    setSubmitting(true)
     const formData = new FormData(event.currentTarget)
-    onLogin(String(formData.get('email')), String(formData.get('password')))
+    try {
+      await onLogin(String(formData.get('email')), String(formData.get('password')))
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'No se pudo iniciar sesión. Inténtalo de nuevo.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -45,11 +56,12 @@ export function LoginScreen({ onLogin, onRegister }: LoginScreenProps) {
               <input autoComplete="current-password" id="login-password" name="password" placeholder="Escribe tu contraseña" required type={passwordVisible ? 'text' : 'password'} />
               <button aria-label={passwordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'} className="ry-icon-button" onClick={() => setPasswordVisible(!passwordVisible)} type="button"><Icon name="eye" size={18} /></button>
             </div>
-            <button className="ry-button ry-button--primary ry-auth-submit" type="submit">Iniciar sesión <Icon name="arrow-right" /></button>
+            {message && <p className="ry-form-message" role="alert">{message}</p>}
+            <button className="ry-button ry-button--primary ry-auth-submit" disabled={submitting} type="submit">{submitting ? 'Verificando…' : 'Iniciar sesión'} <Icon name="arrow-right" /></button>
           </form>
           <div className="ry-divider"><span>¿Aún no tienes cuenta?</span></div>
           <button className="ry-button ry-button--outline ry-auth-register" onClick={onRegister} type="button">Crear una cuenta <Icon name="user" /></button>
-          <p className="ry-auth-note">Demostración local: usa cualquier correo válido y una contraseña. No se guarda ningún dato.</p>
+          <p className="ry-auth-note">Inicia sesión con la cuenta registrada en ReportaYa.</p>
         </div>
         <footer className="ry-auth-footer"><strong>Instituto Tecnológico de Tijuana</strong><span>Prototipo académico · Comunidad estudiantil</span></footer>
       </section>

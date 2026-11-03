@@ -19,6 +19,11 @@ const reportIcon: Record<string, IconName> = {
 } as const
 
 function ReportCard({ report }: { report: Report }) {
+  const reportDate = new Date(`${report.date}T00:00:00`)
+  const formattedDate = Number.isNaN(reportDate.getTime())
+    ? report.date
+    : reportDate.toLocaleDateString('es-MX', { day: '2-digit', month: 'short' })
+
   return (
     <article className="ry-report-card">
       <div className="ry-report-icon"><Icon name={reportIcon[report.category] ?? 'reports'} size={19} /></div>
@@ -30,7 +35,7 @@ function ReportCard({ report }: { report: Report }) {
           </div>
           <Icon name="chevron" size={18} />
         </div>
-        <div className="ry-report-meta"><span>{report.category} · {report.date}</span><StatusBadge status={report.status} /></div>
+        <div className="ry-report-meta"><span>{report.category} · {formattedDate}</span><StatusBadge status={report.status} /></div>
       </div>
     </article>
   )

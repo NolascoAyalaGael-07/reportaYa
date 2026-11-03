@@ -1,52 +1,84 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { ApiError, createReport as saveReport, currentStudent, errorMessage, listReports, login, logout, register } from './api'
 import { HomeScreen } from './screens/HomeScreen'
 import { LoginScreen } from './screens/LoginScreen'
 import { NewReportScreen } from './screens/NewReportScreen'
 import { RegisterScreen } from './screens/RegisterScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
-import { initialReports, type Report, type Student } from './screens/reportTypes'
+import type { Report, Student } from './screens/reportTypes'
 
 type Screen = 'login' | 'register' | 'home' | 'reports' | 'settings' | 'create-report'
-
-function nameFromEmail(email: string) {
-  const name = email.split('@')[0].replace(/[._-]+/g, ' ').trim()
-  return name
-    ? name.split(/\s+/).map((part) => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
-    : 'Estudiante'
-}
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login')
   const [student, setStudent] = useState<Student | null>(null)
-  const [reports, setReports] = useState<Report[]>(initialReports)
+  const [reports, setReports] = useState<Report[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [startupError, setStartupError] = useState('')
 
-  function handleLogin(email: string) {
-    setStudent({
-      name: nameFromEmail(email.trim()),
-      email: email.trim(),
-      controlNumber: 'Cuenta de demostración',
-    })
+  useEffect(() => {
+    let active = true
+
+    async function restoreSession() {
+      try {
+        const current = await currentStudent()
+        const savedReports = await listReports()
+        if (active) {
+          setStudent(current)
+          setReports(savedReports)
+          setScreen('home')
+        }
+      } catch (error) {
+        if (active && !(error instanceof ApiError && error.status === 401)) {
+          setStartupError(errorMessage(error))
+        }
+      } finally {
+        if (active) setIsLoading(false)
+      }
+    }
+
+    void restoreSession()
+    return () => {
+      active = false
+    }
+  }, [])
+
+  async function handleLogin(email: string, password: string) {
+    const signedInStudent = await login(email, password)
+    const savedReports = await listReports()
+    setStudent(signedInStudent)
+    setReports(savedReports)
+    setStartupError('')
     setScreen('home')
   }
 
-  function handleRegister(name: string, controlNumber: string, email: string) {
-    setStudent({ name, controlNumber, email })
+  async function handleRegister(name: string, controlNumber: string, email: string, password: string) {
+    const newStudent = await register(name, controlNumber, email, password)
+    setStudent(newStudent)
+    setReports([])
+    setStartupError('')
     setScreen('home')
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    await logout()
     setStudent(null)
-    setReports(initialReports)
+    setReports([])
     setScreen('login')
   }
 
-  function handleSubmitReport(report: Omit<Report, 'id' | 'date'>) {
-    setReports((currentReports) => [{
-      ...report,
-      id: `report-${Date.now()}`,
-      date: new Date().toLocaleDateString('es-MX', { day: '2-digit', month: 'short' }),
-    }, ...currentReports])
+  async function handleSubmitReport(input: Omit<Report, 'id' | 'date'>) {
+    const savedReport = await saveReport({
+      category: input.category,
+      location: input.location,
+      description: input.description,
+    })
+    setReports((currentReports) => [savedReport, ...currentReports])
     setScreen('home')
+  }
+
+  if (isLoading) {
+    return <main className="ry-loading-screen" role="status">Conectando con ReportaYa…</main>
   }
 
   if (!student) {
@@ -54,7 +86,7 @@ function App() {
       return <RegisterScreen onCreateAccount={handleRegister} onLogin={() => setScreen('login')} />
     }
 
-    return <LoginScreen onLogin={handleLogin} onRegister={() => setScreen('register')} />
+    return <LoginScreen initialError={startupError} onLogin={handleLogin} onRegister={() => setScreen('register')} />
   }
 
   if (screen === 'settings') {

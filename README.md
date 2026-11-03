@@ -5,8 +5,8 @@ Primera maqueta navegable de ReportaYa para presentar el concepto del proyecto e
 ## Estructura
 
 - `frontend`: interfaz React + TypeScript + Tailwind CSS.
-- `backend`: base minima en Node.js + TypeScript, sin conexion con el frontend en esta etapa.
-- `database`: script idempotente para crear la base de datos `ReportaYa` en SQL Server.
+- `backend`: API en Node.js + TypeScript conectada a MySQL para cuentas y reportes.
+- `database`: script SQL para crear las tablas de MySQL usadas en este avance.
 
 ## Ejecutar la maqueta
 
@@ -20,25 +20,35 @@ Primera maqueta navegable de ReportaYa para presentar el concepto del proyecto e
 
 2. Abre la URL que muestre Vite, normalmente `http://localhost:5173`.
 
-Para comprobar el backend minimo:
+## Probar la versión con MySQL
+
+1. Ejecuta `database/mysql_setup.sql` en MySQL Workbench para crear las tablas `users` y `reports` en la base `reportaya`.
+2. Copia `backend/.env.example` como `backend/.env` y completa host, usuario, contraseña y nombre de tu base de datos. No subas el archivo `.env` al repositorio.
+3. En una terminal, inicia el backend:
 
 ```bash
 cd backend
 npm install
-npm run build
-npm start
+npm run dev
 ```
 
-## Crear la base de datos en SQL Server
+4. En otra terminal, inicia la interfaz:
 
-Abre `database/01_create_reportaya.sql` en SQL Server Management Studio o Azure Data Studio y ejecútalo con una cuenta que pueda crear bases de datos. El script crea la base `ReportaYa`, sus tablas, relaciones, índices y catálogos iniciales de estados y categorías.
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-## Alcance actual
+Abre la dirección que muestra Vite, normalmente `http://localhost:5173`. Vite reenvía `/api` al backend en `http://localhost:3001`. Para crear una cuenta de prueba, registra un correo y número de control que no estén usados; después podrás iniciar sesión, crear reportes y consultar los reportes guardados de esa cuenta.
 
-### Avance de interfaz
+Las sesiones usan una cookie `HttpOnly` temporal y se invalidan cuando se detiene el backend. Las contraseñas se guardan con scrypt; el servidor no las devuelve al frontend. Los reportes se guardan en MySQL, pero la foto sigue siendo solo una vista previa local en este avance.
 
-El frontend ofrece las pantallas de inicio de sesión, registro, inicio, reportes, configuración y creación de reportes. Desde el inicio de sesión puedes usar cualquier correo válido y una contraseña no vacía para entrar a la demostración; el registro también es local. Los reportes creados y la cuenta solo se mantienen en memoria mientras la aplicación está abierta. No se guardan contraseñas ni se autentica contra el backend o una base de datos.
+## Pruebas automatizadas del backend
 
-La interfaz permite recorrer los reportes de ejemplo y crear otros desde un formulario. El inicio de sesión y el registro son demostraciones locales; las cuentas y los reportes nuevos solo viven en memoria y no se conectan con SQL Server.
+```bash
+cd backend
+npm test
+```
 
-Los reportes y los datos del perfil son ficticios. Las cuentas y los reportes nuevos solo viven en memoria y se pierden al recargar; no hay autenticación real, persistencia ni conexión con servicios o base de datos. Las categorías y ubicaciones son opciones de demostración, no catálogos conectados a la base de datos.
+Las pruebas usan un repositorio en memoria y no necesitan que MySQL esté iniciado. Cubren validación, registro, inicio de sesión, sesiones y creación/consulta de reportes. Para la aplicación normal, sí necesitas configurar una base de datos MySQL en `backend/.env`.

@@ -4,7 +4,7 @@ import type { Report, ReportStatus } from './reportTypes'
 
 type NewReportScreenProps = {
   onCancel: () => void
-  onSubmitReport: (report: Omit<Report, 'id' | 'date'>) => void
+  onSubmitReport: (report: Omit<Report, 'id' | 'date'>) => Promise<void>
   onOpenHome: () => void
   onOpenReports: () => void
   onOpenSettings: () => void
@@ -36,6 +36,7 @@ export function NewReportScreen({
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoError, setPhotoError] = useState('')
   const [formError, setFormError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [descriptionLength, setDescriptionLength] = useState(0)
   const previewUrl = useMemo(() => photo ? URL.createObjectURL(photo) : null, [photo])
 
@@ -63,7 +64,7 @@ export function NewReportScreen({
     setPhoto(file)
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const description = String(formData.get('description')).trim()
@@ -75,13 +76,20 @@ export function NewReportScreen({
     }
 
     setFormError('')
-    onSubmitReport({
-      title: description.length > 40 ? `${description.slice(0, 37)}…` : description,
-      category: String(formData.get('category')),
-      location,
-      description,
-      status: parseStatus(formData.get('status')),
-    })
+    setSubmitting(true)
+    try {
+      await onSubmitReport({
+        title: description.length > 40 ? `${description.slice(0, 37)}…` : description,
+        category: String(formData.get('category')),
+        location,
+        description,
+        status: parseStatus(formData.get('status')),
+      })
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'No se pudo guardar el reporte. Inténtalo de nuevo.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -142,7 +150,7 @@ export function NewReportScreen({
             </label>
           </div>
           {formError && <p className="ry-photo-error" role="alert">{formError}</p>}
-          <button className="ry-button ry-button--primary ry-submit-report" type="submit"><Icon name="arrow-right" /> Enviar reporte</button>
+          <button className="ry-button ry-button--primary ry-submit-report" disabled={submitting} type="submit"><Icon name="arrow-right" /> {submitting ? 'Guardando…' : 'Enviar reporte'}</button>
         </form>
       </main>
       <nav aria-label="Navegación principal" className="ry-bottom-nav ry-bottom-nav--four">

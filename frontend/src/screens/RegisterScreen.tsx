@@ -2,7 +2,7 @@ import { FormEvent, useState } from 'react'
 import { Brand, Icon } from '../components/Brand'
 
 type RegisterScreenProps = {
-  onCreateAccount: (name: string, controlNumber: string, email: string) => void
+  onCreateAccount: (name: string, controlNumber: string, email: string, password: string) => Promise<void>
   onLogin: () => void
 }
 
@@ -10,8 +10,9 @@ export function RegisterScreen({ onCreateAccount, onLogin }: RegisterScreenProps
   const [passwordVisible, setPasswordVisible] = useState(false)
   const [message, setMessage] = useState('')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    setMessage('')
     const formData = new FormData(event.currentTarget)
     const password = String(formData.get('password'))
     const confirmation = String(formData.get('confirmation'))
@@ -21,11 +22,16 @@ export function RegisterScreen({ onCreateAccount, onLogin }: RegisterScreenProps
       return
     }
 
-    onCreateAccount(
-      String(formData.get('name')).trim(),
-      String(formData.get('controlNumber')).trim(),
-      String(formData.get('email')).trim(),
-    )
+    try {
+      await onCreateAccount(
+        String(formData.get('name')).trim(),
+        String(formData.get('controlNumber')).trim(),
+        String(formData.get('email')).trim(),
+        password,
+      )
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'No se pudo crear la cuenta. Inténtalo de nuevo.')
+    }
   }
 
   return (
@@ -63,7 +69,7 @@ export function RegisterScreen({ onCreateAccount, onLogin }: RegisterScreenProps
             <button className="ry-button ry-button--primary ry-auth-submit" type="submit">Crear cuenta <Icon name="arrow-right" /></button>
           </form>
           <p className="ry-register-login">¿Ya tienes cuenta? <button onClick={onLogin} type="button">Inicia sesión</button></p>
-          <p className="ry-auth-note">Prototipo académico: los datos no se envían ni guardan.</p>
+          <p className="ry-auth-note">Tu contraseña se guarda protegida en el servidor.</p>
         </div>
         <footer className="ry-auth-footer"><strong>Instituto Tecnológico de Tijuana</strong><span>Prototipo académico · Comunidad estudiantil</span></footer>
       </section>

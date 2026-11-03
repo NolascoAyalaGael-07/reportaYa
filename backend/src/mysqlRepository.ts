@@ -47,7 +47,7 @@ export function createPool(environment: Environment): Pool {
 
 function toStudent(row: UserRow): Student {
   return {
-    id: row.id,
+    id: String(row.id),
     name: row.name,
     controlNumber: row.controlNumber,
     email: row.email,

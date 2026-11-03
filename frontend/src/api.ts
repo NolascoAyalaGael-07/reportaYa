@@ -1,0 +1,81 @@
+import type { Report, Student } from './screens/reportTypes'
+
+export class ApiError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
+type ApiResponse<T> = {
+  data?: T
+  message?: string
+}
+
+async function request<T>(path: string, body?: unknown): Promise<T> {
+  let response: Response
+
+  try {
+    response = await fetch(path, {
+      method: body === undefined ? 'GET' : 'POST',
+      credentials: 'same-origin',
+      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+  } catch {
+    throw new Error('No se pudo conectar con ReportaYa. Verifica que el backend esté ejecutándose.')
+  }
+
+  if (response.status === 204) return undefined as T
+  const result: unknown = await response.json()
+  if (!response.ok) {
+    const message = typeof result === 'object'
+      && result !== null
+      && 'message' in result
+      && typeof result.message === 'string'
+      ? result.message
+      : 'Ocurrió un error. Inténtalo de nuevo.'
+    throw new ApiError(message, response.status)
+  }
+  return result as T
+}
+
+type AuthResponse = { student: Student }
+
+export async function login(email: string, password: string): Promise<Student> {
+  const result = await request<AuthResponse>('/api/auth/login', { email, password })
+  return result.student
+}
+
+export async function register(
+  name: string,
+  controlNumber: string,
+  email: string,
+  password: string,
+): Promise<Student> {
+  const result = await request<AuthResponse>('/api/auth/register', { name, controlNumber, email, password })
+  return result.student
+}
+
+export async function currentStudent(): Promise<Student> {
+  const result = await request<AuthResponse>('/api/auth/me')
+  return result.student
+}
+
+export async function logout(): Promise<void> {
+  await request<undefined>('/api/auth/logout', {})
+}
+
+export async function listReports(): Promise<Report[]> {
+  const result = await request<{ reports: Report[] }>('/api/reports')
+  return result.reports
+}
+
+export async function createReport(report: Pick<Report, 'category' | 'location' | 'description'>): Promise<Report> {
+  const result = await request<{ report: Report }>('/api/reports', report)
+  return result.report
+}
+
+export function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : 'Ocurrió un error. Inténtalo de nuevo.'
+}
