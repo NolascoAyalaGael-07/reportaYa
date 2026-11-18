@@ -27,6 +27,7 @@ export type ReportRecord = ReportInput & {
   date: string
   reporterName: string
   reporterControlNumber: string
+  photoUrl: string | null
 }
 
 export type ReportFilters = {
@@ -51,7 +52,8 @@ export interface Repository {
   updateUserRole(actorId: string, targetId: string, role: UserRole): Promise<
     { student: Student } | { error: 'not_found' | 'last_admin' | 'self' }
   >
-  createReport(userId: string, input: ReportInput): Promise<ReportRecord>
+  createReport(userId: string, input: ReportInput, photoPath: string | null): Promise<ReportRecord>
+  getReportPhotoPath(userId: string, role: UserRole, reportId: string): Promise<string | null>
   getReport(userId: string, role: UserRole, reportId: string): Promise<ReportRecord | null>
   listReports(userId: string, role: UserRole, filters: ReportFilters): Promise<ReportRecord[]>
   updateReportStatus(actorId: string, reportId: string, status: ReportStatus, comment: string | null): Promise<

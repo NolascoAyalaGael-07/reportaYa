@@ -22,6 +22,7 @@ type ReportRow = RowDataPacket & {
   date: string
   reporterName: string
   reporterControlNumber: string
+  photoPath: string | null
 }
 
 type HistoryRow = RowDataPacket & {
@@ -44,6 +45,7 @@ function toReport(row: ReportRow): ReportRecord {
     date: row.date,
     reporterName: row.reporterName,
     reporterControlNumber: row.reporterControlNumber,
+    photoUrl: row.photoPath ? `/api/reports/${String(row.id)}/photo` : null,
   }
 }
 
@@ -51,6 +53,7 @@ const reportSelect = `
   SELECT r.id, r.title, r.category, r.location, r.description, r.status,
     DATE_FORMAT(r.created_at, "%Y-%m-%d") AS date,
     u.name AS reporterName, u.control_number AS reporterControlNumber
+    , r.photo_path AS photoPath
   FROM reports r JOIN users u ON u.id = r.user_id
 `
 
@@ -156,13 +159,13 @@ export function createMysqlRepository(pool: Pool): Repository {
       }
     },
 
-    async createReport(userId: string, input: ReportInput) {
+    async createReport(userId: string, input: ReportInput, photoPath: string | null) {
       const connection = await pool.getConnection()
       try {
         await connection.beginTransaction()
         const [result] = await connection.execute<ResultSetHeader>(
-          'INSERT INTO reports (user_id, title, category, location, description, status) VALUES (?, ?, ?, ?, ?, ?)',
-          [userId, input.title, input.category, input.location, input.description, input.status],
+          'INSERT INTO reports (user_id, title, category, location, description, status, photo_path) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [userId, input.title, input.category, input.location, input.description, input.status, photoPath],
         )
         await connection.execute(
           'INSERT INTO report_status_history (report_id, from_status, to_status, changed_by) VALUES (?, NULL, ?, ?)',
@@ -192,6 +195,17 @@ export function createMysqlRepository(pool: Pool): Repository {
         parameters,
       )
       return rows[0] ? toReport(rows[0]) : null
+    },
+
+    async getReportPhotoPath(userId, role, reportId) {
+      const ownership = role === 'alumno' ? ' AND user_id = ?' : ''
+      const parameters = role === 'alumno' ? [reportId, userId] : [reportId]
+      const [rows] = await pool.execute<RowDataPacket[]>(
+        `SELECT photo_path AS photoPath FROM reports WHERE id = ?${ownership} LIMIT 1`,
+        parameters,
+      )
+      const row = rows[0] as { photoPath: string | null } | undefined
+      return row?.photoPath ?? null
     },
 
     async listReports(userId: string, role: UserRole, filters: ReportFilters) {

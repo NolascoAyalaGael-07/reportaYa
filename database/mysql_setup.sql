@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS reports (
   location VARCHAR(200) NOT NULL,
   description VARCHAR(500) NOT NULL,
   status ENUM('Pendiente', 'En atención', 'Solucionado') NOT NULL DEFAULT 'Pendiente',
+  photo_path VARCHAR(255) NULL,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   KEY ix_reports_user_created (user_id, created_at),

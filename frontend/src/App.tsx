@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ApiError, createReport as saveReport, currentStudent, errorMessage, listReports, login, logout, register } from './api'
 import { HomeScreen } from './screens/HomeScreen'
 import { LoginScreen } from './screens/LoginScreen'
-import { NewReportScreen } from './screens/NewReportScreen'
+import { NewReportScreen, type NewReportInput } from './screens/NewReportScreen'
 import { RegisterScreen } from './screens/RegisterScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { UsersScreen } from './screens/UsersScreen'
@@ -68,12 +68,12 @@ function App() {
     setScreen('login')
   }
 
-  async function handleSubmitReport(input: Omit<Report, 'id' | 'date'>) {
+  async function handleSubmitReport(input: NewReportInput) {
     const savedReport = await saveReport({
       category: input.category,
       location: input.location,
       description: input.description,
-    })
+    }, input.photo)
     setReports((currentReports) => [savedReport, ...currentReports])
     setScreen('home')
   }

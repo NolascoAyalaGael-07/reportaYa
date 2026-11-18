@@ -5,6 +5,7 @@ export class TestRepository implements Repository {
   readonly reports: ReportRecord[] = []
   readonly history = new Map<string, StatusHistoryEntry[]>()
   private readonly reportOwners = new Map<string, string>()
+  private readonly reportPhotos = new Map<string, string>()
   private nextUserId = 1
   private nextReportId = 1
 
@@ -44,17 +45,20 @@ export class TestRepository implements Repository {
     return { student }
   }
 
-  async createReport(userId: string, input: ReportInput) {
+  async createReport(userId: string, input: ReportInput, photoPath: string | null) {
     const user = this.users.find((candidate) => candidate.id === userId)
     if (!user) throw new Error('Report owner does not exist')
+    const id = String(this.nextReportId++)
     const report = {
       ...input,
-      id: String(this.nextReportId++),
+      id,
       date: '2026-10-26',
       reporterName: user.name,
       reporterControlNumber: user.controlNumber,
+      photoUrl: photoPath ? `/api/reports/${id}/photo` : null,
     }
     this.reportOwners.set(report.id, userId)
+    if (photoPath) this.reportPhotos.set(report.id, photoPath)
     this.reports.unshift(report)
     this.history.set(report.id, [{
       id: `${report.id}-1`,
@@ -70,6 +74,11 @@ export class TestRepository implements Repository {
   async getReport(userId: string, role: UserRole, reportId: string) {
     if (role === 'alumno' && this.reportOwners.get(reportId) !== userId) return null
     return this.reports.find((report) => report.id === reportId) ?? null
+  }
+
+  async getReportPhotoPath(userId: string, role: UserRole, reportId: string) {
+    if (role === 'alumno' && this.reportOwners.get(reportId) !== userId) return null
+    return this.reportPhotos.get(reportId) ?? null
   }
 
   async listReports(userId: string, role: UserRole, filters: ReportFilters) {

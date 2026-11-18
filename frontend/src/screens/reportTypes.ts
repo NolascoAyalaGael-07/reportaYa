@@ -8,6 +8,9 @@ export type Report = {
   status: ReportStatus
   date: string
   description: string
+  reporterName: string
+  reporterControlNumber: string
+  photoUrl: string | null
 }
 
 export type Student = {

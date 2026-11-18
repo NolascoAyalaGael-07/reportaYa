@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
 import { Brand, Icon } from '../components/Brand'
-import type { Report, ReportStatus } from './reportTypes'
+import type { Report } from './reportTypes'
+
+export type NewReportInput = Pick<Report, 'category' | 'location' | 'description'> & { photo: File | null }
 
 type NewReportScreenProps = {
   onCancel: () => void
-  onSubmitReport: (report: Omit<Report, 'id' | 'date'>) => Promise<void>
+  onSubmitReport: (report: NewReportInput) => Promise<void>
   onOpenHome: () => void
   onOpenReports: () => void
   onOpenSettings: () => void
@@ -12,19 +14,6 @@ type NewReportScreenProps = {
 }
 
 const categories = ['Electricidad', 'Plomería', 'Limpieza', 'Mobiliario', 'Otro']
-const statuses: ReportStatus[] = ['Pendiente', 'En atención', 'Solucionado']
-
-function parseStatus(value: FormDataEntryValue | null): ReportStatus {
-  switch (value) {
-    case 'Pendiente':
-    case 'En atención':
-    case 'Solucionado':
-      return value
-    default:
-      throw new Error('Selecciona un estado válido para el reporte.')
-  }
-}
-
 export function NewReportScreen({
   onCancel,
   onSubmitReport,
@@ -79,11 +68,10 @@ export function NewReportScreen({
     setSubmitting(true)
     try {
       await onSubmitReport({
-        title: description.length > 40 ? `${description.slice(0, 37)}…` : description,
         category: String(formData.get('category')),
         location,
         description,
-        status: parseStatus(formData.get('status')),
+        photo,
       })
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'No se pudo guardar el reporte. Inténtalo de nuevo.')
@@ -143,11 +131,11 @@ export function NewReportScreen({
               <span className="ry-upload-inner"><Icon name="camera" size={22} /><strong>{photo ? 'Cambiar foto' : 'Agregar foto'}</strong><small>JPG, PNG (máx. 5 MB)</small></span>
               <input accept="image/jpeg,image/png" className="ry-visually-hidden" onChange={handlePhotoChange} type="file" />
             </label>
-            <label className="ry-field-card ry-status-card" htmlFor="report-status">
+            <section className="ry-field-card ry-status-card" aria-label="Estado inicial del reporte">
               <span className="ry-field-title"><Icon name="check" /><span><strong>Estado del reporte</strong><small>Estado inicial para seguimiento.</small></span></span>
-              <span className="ry-status-select"><i className="ry-dot ry-dot--pending" /><select defaultValue={statuses[0]} id="report-status" name="status">{statuses.map((status) => <option key={status}>{status}</option>)}</select></span>
+              <span className="ry-status-select"><i className="ry-dot ry-dot--pending" /><strong>Pendiente</strong></span>
               <small className="ry-status-help">El personal administrativo podrá actualizarlo.</small>
-            </label>
+            </section>
           </div>
           {formError && <p className="ry-photo-error" role="alert">{formError}</p>}
           <button className="ry-button ry-button--primary ry-submit-report" disabled={submitting} type="submit"><Icon name="arrow-right" /> {submitting ? 'Guardando…' : 'Enviar reporte'}</button>

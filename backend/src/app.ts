@@ -1,5 +1,8 @@
-import { randomBytes } from 'node:crypto'
+import { randomBytes, randomUUID } from 'node:crypto'
+import { mkdir, readFile, rename, unlink } from 'node:fs/promises'
+import { basename, resolve } from 'node:path'
 import express, { type NextFunction, type Request, type Response } from 'express'
+import multer from 'multer'
 import { hashPassword, verifyPassword } from './auth.js'
 import type { Repository, ReportInput, ReportStatus, Student, UserRecord, UserRole } from './types.js'
 
@@ -17,6 +20,20 @@ type Credentials = {
   controlNumber: string
   email: string
   password: string
+}
+
+type AppOptions = {
+  uploadDirectory?: string
+}
+
+class UnsupportedImageError extends Error {}
+
+async function removeUploadedFile(filePath: string): Promise<void> {
+  try {
+    await unlink(filePath)
+  } catch (error) {
+    if (!isRecord(error) || error.code !== 'ENOENT') throw error
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -154,9 +171,28 @@ function requireRole(...roles: UserRole[]) {
   }
 }
 
-export function createApp(repository: Repository) {
+export function createApp(repository: Repository, options: AppOptions = {}) {
   const app = express()
   const sessions = new Map<string, Session>()
+  const uploadDirectory = resolve(options.uploadDirectory ?? resolve(process.cwd(), 'uploads'))
+  const upload = multer({
+    storage: multer.diskStorage({
+      destination: (_request, _file, callback) => {
+        void mkdir(uploadDirectory, { recursive: true })
+          .then(() => callback(null, uploadDirectory))
+          .catch((error: Error) => callback(error, uploadDirectory))
+      },
+      filename: (_request, _file, callback) => callback(null, `${randomUUID()}.upload`),
+    }),
+    limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+    fileFilter: (_request, file, callback) => {
+      if (file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png') {
+        callback(new UnsupportedImageError('Elige una imagen JPG o PNG.'))
+        return
+      }
+      callback(null, true)
+    },
+  })
   app.use(express.json({ limit: '16kb' }))
 
   app.post('/api/auth/register', async (request, response) => {
@@ -286,13 +322,94 @@ export function createApp(repository: Repository) {
     return response.json({ history: await repository.listStatusHistory(student.id, student.role, reportId) })
   })
 
-  app.post('/api/reports', requireSession, requireRole('alumno'), async (request, response) => {
+  app.get('/api/reports/:id/photo', requireSession, async (request, response) => {
+    const student = response.locals.student
+    const reportId = request.params.id
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (typeof reportId !== 'string' || !/^[1-9]\d*$/.test(reportId)) {
+      return response.status(400).json({ message: 'Selecciona un reporte válido.' })
+    }
+
+    const photoPath = await repository.getReportPhotoPath(student.id, student.role, reportId)
+    if (!photoPath) return response.status(404).json({ message: 'No se encontró una fotografía para ese reporte.' })
+    const fileName = basename(photoPath)
+    if (fileName !== photoPath || !/\.(jpg|png)$/.test(fileName)) {
+      throw new Error('El reporte tiene una ruta de fotografía inválida.')
+    }
+
+    const filePath = resolve(uploadDirectory, fileName)
+    let image: Buffer
+    try {
+      image = await readFile(filePath)
+    } catch (error) {
+      if (isRecord(error) && error.code === 'ENOENT') {
+        return response.status(404).json({ message: 'La fotografía de este reporte ya no está disponible.' })
+      }
+      throw error
+    }
+    response.setHeader('X-Content-Type-Options', 'nosniff')
+    response.type(fileName.endsWith('.png') ? 'image/png' : 'image/jpeg')
+    return response.send(image)
+  })
+
+  app.post('/api/reports', requireSession, requireRole('alumno'), upload.single('photo'), async (request, response) => {
     const student = response.locals.student
     if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
     const parsed = parseReport(request.body)
-    if (!parsed.data) return response.status(400).json({ message: parsed.error })
-    const report = await repository.createReport(student.id, parsed.data)
-    return response.status(201).json({ report })
+    if (!parsed.data) {
+      if (request.file) await removeUploadedFile(request.file.path)
+      return response.status(400).json({ message: parsed.error })
+    }
+
+    let photoPath: string | null = null
+    let fileToClean = request.file?.path
+    if (request.file) {
+      try {
+        const contents = await readFile(request.file.path)
+        const pngSignature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+        const jpegSignature = Buffer.from([0xff, 0xd8, 0xff])
+        const extension = contents.subarray(0, pngSignature.length).equals(pngSignature)
+          ? 'png'
+          : contents.subarray(0, jpegSignature.length).equals(jpegSignature)
+            ? 'jpg'
+            : null
+        if (!extension) {
+          await removeUploadedFile(request.file.path)
+          return response.status(400).json({ message: 'El archivo no contiene una imagen JPG o PNG válida.' })
+        }
+
+        photoPath = `${randomUUID()}.${extension}`
+        const storedImagePath = resolve(uploadDirectory, photoPath)
+        await rename(request.file.path, storedImagePath)
+        fileToClean = storedImagePath
+      } catch (error) {
+        if (fileToClean) {
+          try {
+            await removeUploadedFile(fileToClean)
+          } catch (cleanupError) {
+            console.error('Error al limpiar una imagen inválida:', cleanupError)
+          }
+        }
+        throw error
+      }
+    }
+
+    try {
+      const report = await repository.createReport(student.id, parsed.data, photoPath)
+      fileToClean = undefined
+      return response.status(201).json({ report })
+    } catch (error) {
+      if (fileToClean) {
+        try {
+          await removeUploadedFile(fileToClean)
+        } catch (cleanupError) {
+          if (!isRecord(cleanupError) || cleanupError.code !== 'ENOENT') {
+            console.error('Error al limpiar una imagen de reporte fallida:', cleanupError)
+          }
+        }
+      }
+      throw error
+    }
   })
 
   app.patch('/api/reports/:id/status', requireSession, requireRole('mantenimiento', 'administrador'), async (request, response) => {
@@ -319,6 +436,12 @@ export function createApp(repository: Repository) {
   })
 
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {
+    if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+      return response.status(413).json({ message: 'La imagen debe pesar 5 MB o menos.' })
+    }
+    if (error instanceof UnsupportedImageError) {
+      return response.status(400).json({ message: error.message })
+    }
     console.error('Error en ReportaYa API:', error)
     if (response.headersSent) return
     return response.status(500).json({ message: 'Ocurrió un error inesperado. Inténtalo de nuevo.' })

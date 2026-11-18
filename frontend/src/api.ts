@@ -19,8 +19,10 @@ async function request<T>(path: string, body?: unknown): Promise<T> {
     response = await fetch(path, {
       method: body === undefined ? 'GET' : 'POST',
       credentials: 'same-origin',
-      headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
-      body: body === undefined ? undefined : JSON.stringify(body),
+      headers: body === undefined || body instanceof FormData
+        ? undefined
+        : { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
     })
   } catch {
     throw new Error('No se pudo conectar con ReportaYa. Verifica que el backend esté ejecutándose.')
@@ -84,8 +86,16 @@ export async function listReports(): Promise<Report[]> {
   return result.reports
 }
 
-export async function createReport(report: Pick<Report, 'category' | 'location' | 'description'>): Promise<Report> {
-  const result = await request<{ report: Report }>('/api/reports', report)
+export async function createReport(
+  report: Pick<Report, 'category' | 'location' | 'description'>,
+  photo?: File | null,
+): Promise<Report> {
+  const formData = new FormData()
+  formData.set('category', report.category)
+  formData.set('location', report.location)
+  formData.set('description', report.description)
+  if (photo) formData.set('photo', photo)
+  const result = await request<{ report: Report }>('/api/reports', formData)
   return result.report
 }
 
