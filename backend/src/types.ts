@@ -25,6 +25,23 @@ export type ReportInput = {
 export type ReportRecord = ReportInput & {
   id: string
   date: string
+  reporterName: string
+  reporterControlNumber: string
+}
+
+export type ReportFilters = {
+  status?: ReportStatus
+  category?: string
+  query?: string
+}
+
+export type StatusHistoryEntry = {
+  id: string
+  fromStatus: ReportStatus | null
+  toStatus: ReportStatus
+  changedBy: string
+  changedAt: string
+  comment: string | null
 }
 
 export interface Repository {
@@ -35,7 +52,12 @@ export interface Repository {
     { student: Student } | { error: 'not_found' | 'last_admin' | 'self' }
   >
   createReport(userId: string, input: ReportInput): Promise<ReportRecord>
-  listReports(userId: string): Promise<ReportRecord[]>
+  getReport(userId: string, role: UserRole, reportId: string): Promise<ReportRecord | null>
+  listReports(userId: string, role: UserRole, filters: ReportFilters): Promise<ReportRecord[]>
+  updateReportStatus(actorId: string, reportId: string, status: ReportStatus, comment: string | null): Promise<
+    { report: ReportRecord } | { error: 'not_found' | 'unchanged' }
+  >
+  listStatusHistory(userId: string, role: UserRole, reportId: string): Promise<StatusHistoryEntry[]>
 }
 
 declare global {

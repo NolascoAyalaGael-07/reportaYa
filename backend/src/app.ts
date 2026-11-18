@@ -6,6 +6,7 @@ import type { Repository, ReportInput, ReportStatus, Student, UserRecord, UserRo
 const sessionCookie = 'reportaya_session'
 const sessionLifetimeMs = 8 * 60 * 60 * 1000
 const allowedCategories = new Set(['Electricidad', 'Plomería', 'Limpieza', 'Mobiliario', 'Otro'])
+const reportStatuses = new Set<ReportStatus>(['Pendiente', 'En atención', 'Solucionado'])
 type Session = {
   student: Student
   expiresAt: number
@@ -88,6 +89,31 @@ function parseRole(value: unknown): UserRole | null {
   return value.role === 'alumno' || value.role === 'mantenimiento' || value.role === 'administrador'
     ? value.role
     : null
+}
+
+function parseStatus(value: unknown): ReportStatus | null {
+  if (!isRecord(value) || typeof value.status !== 'string') return null
+  return reportStatuses.has(value.status as ReportStatus) ? value.status as ReportStatus : null
+}
+
+function parseReportFilters(query: Request['query']): { data?: { status?: ReportStatus; category?: string; query?: string }; error?: string } {
+  const { status, category, q } = query
+  if (status !== undefined && (typeof status !== 'string' || !reportStatuses.has(status as ReportStatus))) {
+    return { error: 'Selecciona un estado válido.' }
+  }
+  if (category !== undefined && (typeof category !== 'string' || !allowedCategories.has(category))) {
+    return { error: 'Selecciona una categoría válida.' }
+  }
+  if (q !== undefined && (typeof q !== 'string' || q.trim().length > 100)) {
+    return { error: 'La búsqueda no puede superar 100 caracteres.' }
+  }
+  return {
+    data: {
+      ...(typeof status === 'string' ? { status: status as ReportStatus } : {}),
+      ...(typeof category === 'string' ? { category } : {}),
+      ...(typeof q === 'string' && q.trim() ? { query: q.trim() } : {}),
+    },
+  }
 }
 
 function isDuplicateEntry(error: unknown): boolean {
@@ -228,8 +254,36 @@ export function createApp(repository: Repository) {
   app.get('/api/reports', requireSession, async (_request, response) => {
     const student = response.locals.student
     if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
-    const reports = await repository.listReports(student.id)
+    const filters = parseReportFilters(_request.query)
+    if (!filters.data) return response.status(400).json({ message: filters.error })
+    const reports = await repository.listReports(student.id, student.role, filters.data)
     return response.json({ reports })
+  })
+
+  app.get('/api/reports/:id', requireSession, async (request, response) => {
+    const student = response.locals.student
+    const reportId = request.params.id
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (typeof reportId !== 'string' || !/^[1-9]\d*$/.test(reportId)) {
+      return response.status(400).json({ message: 'Selecciona un reporte válido.' })
+    }
+
+    const report = await repository.getReport(student.id, student.role, reportId)
+    if (!report) return response.status(404).json({ message: 'No se encontró ese reporte.' })
+    return response.json({ report })
+  })
+
+  app.get('/api/reports/:id/history', requireSession, async (request, response) => {
+    const student = response.locals.student
+    const reportId = request.params.id
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (typeof reportId !== 'string' || !/^[1-9]\d*$/.test(reportId)) {
+      return response.status(400).json({ message: 'Selecciona un reporte válido.' })
+    }
+
+    const report = await repository.getReport(student.id, student.role, reportId)
+    if (!report) return response.status(404).json({ message: 'No se encontró ese reporte.' })
+    return response.json({ history: await repository.listStatusHistory(student.id, student.role, reportId) })
   })
 
   app.post('/api/reports', requireSession, requireRole('alumno'), async (request, response) => {
@@ -239,6 +293,29 @@ export function createApp(repository: Repository) {
     if (!parsed.data) return response.status(400).json({ message: parsed.error })
     const report = await repository.createReport(student.id, parsed.data)
     return response.status(201).json({ report })
+  })
+
+  app.patch('/api/reports/:id/status', requireSession, requireRole('mantenimiento', 'administrador'), async (request, response) => {
+    const student = response.locals.student
+    const reportId = request.params.id
+    const status = parseStatus(request.body)
+    const comment = isRecord(request.body) && typeof request.body.comment === 'string'
+      ? request.body.comment.trim()
+      : ''
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (typeof reportId !== 'string' || !/^[1-9]\d*$/.test(reportId) || !status) {
+      return response.status(400).json({ message: 'Selecciona un reporte y estado válidos.' })
+    }
+    if (comment.length > 300) return response.status(400).json({ message: 'El comentario no puede superar 300 caracteres.' })
+
+    const result = await repository.updateReportStatus(student.id, reportId, status, comment || null)
+    if ('error' in result) {
+      const message = result.error === 'not_found'
+        ? 'No se encontró ese reporte.'
+        : 'El reporte ya tiene ese estado.'
+      return response.status(result.error === 'not_found' ? 404 : 409).json({ message })
+    }
+    return response.json({ report: result.report })
   })
 
   app.use((error: unknown, _request: Request, response: Response, _next: NextFunction) => {

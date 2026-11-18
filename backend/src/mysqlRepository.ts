@@ -1,5 +1,5 @@
 import mysql, { type Pool, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise'
-import type { Repository, ReportInput, ReportRecord, Student, UserRecord, UserRole } from './types.js'
+import type { Repository, ReportFilters, ReportInput, ReportRecord, Student, StatusHistoryEntry, UserRecord, UserRole } from './types.js'
 
 type Environment = Record<string, string | undefined>
 
@@ -20,7 +20,39 @@ type ReportRow = RowDataPacket & {
   description: string
   status: ReportRecord['status']
   date: string
+  reporterName: string
+  reporterControlNumber: string
 }
+
+type HistoryRow = RowDataPacket & {
+  id: string
+  fromStatus: ReportRecord['status'] | null
+  toStatus: ReportRecord['status']
+  changedBy: string
+  changedAt: string
+  comment: string | null
+}
+
+function toReport(row: ReportRow): ReportRecord {
+  return {
+    id: String(row.id),
+    title: row.title,
+    category: row.category,
+    location: row.location,
+    description: row.description,
+    status: row.status,
+    date: row.date,
+    reporterName: row.reporterName,
+    reporterControlNumber: row.reporterControlNumber,
+  }
+}
+
+const reportSelect = `
+  SELECT r.id, r.title, r.category, r.location, r.description, r.status,
+    DATE_FORMAT(r.created_at, "%Y-%m-%d") AS date,
+    u.name AS reporterName, u.control_number AS reporterControlNumber
+  FROM reports r JOIN users u ON u.id = r.user_id
+`
 
 export function createPool(environment: Environment): Pool {
   const { MYSQL_HOST, MYSQL_USER, MYSQL_DATABASE } = environment
@@ -125,25 +157,127 @@ export function createMysqlRepository(pool: Pool): Repository {
     },
 
     async createReport(userId: string, input: ReportInput) {
-      const [result] = await pool.execute<ResultSetHeader>(
-        'INSERT INTO reports (user_id, title, category, location, description, status) VALUES (?, ?, ?, ?, ?, ?)',
-        [userId, input.title, input.category, input.location, input.description, input.status],
-      )
-      const [rows] = await pool.execute<ReportRow[]>(
-        'SELECT id, title, category, location, description, status, DATE_FORMAT(created_at, "%Y-%m-%d") AS date FROM reports WHERE id = ? LIMIT 1',
-        [result.insertId],
-      )
-      const row = rows[0]
-      if (!row) throw new Error('MySQL no devolvió el reporte recién creado.')
-      return { ...row, id: String(row.id) }
+      const connection = await pool.getConnection()
+      try {
+        await connection.beginTransaction()
+        const [result] = await connection.execute<ResultSetHeader>(
+          'INSERT INTO reports (user_id, title, category, location, description, status) VALUES (?, ?, ?, ?, ?, ?)',
+          [userId, input.title, input.category, input.location, input.description, input.status],
+        )
+        await connection.execute(
+          'INSERT INTO report_status_history (report_id, from_status, to_status, changed_by) VALUES (?, NULL, ?, ?)',
+          [result.insertId, input.status, userId],
+        )
+        const [rows] = await connection.execute<ReportRow[]>(
+          `${reportSelect} WHERE r.id = ? LIMIT 1`,
+          [result.insertId],
+        )
+        const row = rows[0]
+        if (!row) throw new Error('MySQL no devolvió el reporte recién creado.')
+        await connection.commit()
+        return toReport(row)
+      } catch (error) {
+        await connection.rollback()
+        throw error
+      } finally {
+        connection.release()
+      }
     },
 
-    async listReports(userId: string) {
+    async getReport(userId: string, role: UserRole, reportId: string) {
+      const ownership = role === 'alumno' ? ' AND r.user_id = ?' : ''
+      const parameters = role === 'alumno' ? [reportId, userId] : [reportId]
       const [rows] = await pool.execute<ReportRow[]>(
-        'SELECT id, title, category, location, description, status, DATE_FORMAT(created_at, "%Y-%m-%d") AS date FROM reports WHERE user_id = ? ORDER BY created_at DESC, id DESC',
-        [userId],
+        `${reportSelect} WHERE r.id = ?${ownership} LIMIT 1`,
+        parameters,
       )
-      return rows.map((row) => ({ ...row, id: String(row.id) }))
+      return rows[0] ? toReport(rows[0]) : null
+    },
+
+    async listReports(userId: string, role: UserRole, filters: ReportFilters) {
+      const conditions: string[] = []
+      const parameters: (string | number)[] = []
+      if (role === 'alumno') {
+        conditions.push('r.user_id = ?')
+        parameters.push(userId)
+      }
+      if (filters.status) {
+        conditions.push('r.status = ?')
+        parameters.push(filters.status)
+      }
+      if (filters.category) {
+        conditions.push('r.category = ?')
+        parameters.push(filters.category)
+      }
+      if (filters.query) {
+        conditions.push('(r.title LIKE ? OR r.description LIKE ? OR r.location LIKE ? OR u.name LIKE ? OR u.control_number LIKE ?)')
+        const search = `%${filters.query}%`
+        parameters.push(search, search, search, search, search)
+      }
+      const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
+      const [rows] = await pool.execute<ReportRow[]>(
+        `${reportSelect} ${where} ORDER BY r.created_at DESC, r.id DESC LIMIT 200`,
+        parameters,
+      )
+      return rows.map(toReport)
+    },
+
+    async updateReportStatus(actorId, reportId, status, comment) {
+      const connection = await pool.getConnection()
+      try {
+        await connection.beginTransaction()
+        const [rows] = await connection.execute<RowDataPacket[]>(
+          'SELECT status FROM reports WHERE id = ? FOR UPDATE',
+          [reportId],
+        )
+        const row = rows[0] as { status: ReportRecord['status'] } | undefined
+        if (!row) {
+          await connection.rollback()
+          return { error: 'not_found' as const }
+        }
+        if (row.status === status) {
+          await connection.rollback()
+          return { error: 'unchanged' as const }
+        }
+
+        await connection.execute('UPDATE reports SET status = ? WHERE id = ?', [status, reportId])
+        await connection.execute(
+          'INSERT INTO report_status_history (report_id, from_status, to_status, changed_by, comment) VALUES (?, ?, ?, ?, ?)',
+          [reportId, row.status, status, actorId, comment],
+        )
+        const [updatedRows] = await connection.execute<ReportRow[]>(
+          `${reportSelect} WHERE r.id = ? LIMIT 1`,
+          [reportId],
+        )
+        const updated = updatedRows[0]
+        if (!updated) throw new Error('MySQL no devolvió el reporte actualizado.')
+        await connection.commit()
+        return { report: toReport(updated) }
+      } catch (error) {
+        await connection.rollback()
+        throw error
+      } finally {
+        connection.release()
+      }
+    },
+
+    async listStatusHistory(userId, role, reportId) {
+      const ownership = role === 'alumno' ? ' AND r.user_id = ?' : ''
+      const parameters = role === 'alumno' ? [reportId, userId] : [reportId]
+      const [rows] = await pool.execute<HistoryRow[]>(
+        `SELECT h.id, h.from_status AS fromStatus, h.to_status AS toStatus,
+          u.name AS changedBy, DATE_FORMAT(h.changed_at, "%Y-%m-%d %H:%i:%s") AS changedAt, h.comment
+        FROM report_status_history h
+        JOIN reports r ON r.id = h.report_id
+        JOIN users u ON u.id = h.changed_by
+        WHERE h.report_id = ?${ownership}
+        ORDER BY h.changed_at ASC, h.id ASC`,
+        parameters,
+      )
+      return rows.map((row): StatusHistoryEntry => ({
+        ...row,
+        id: String(row.id),
+      }))
     },
   }
 }

@@ -1,8 +1,10 @@
-import type { Repository, ReportInput, ReportRecord, Student, UserRecord } from '../types.js'
+import type { Repository, ReportFilters, ReportInput, ReportRecord, ReportStatus, Student, StatusHistoryEntry, UserRecord, UserRole } from '../types.js'
 
 export class TestRepository implements Repository {
   readonly users: UserRecord[] = []
   readonly reports: ReportRecord[] = []
+  readonly history = new Map<string, StatusHistoryEntry[]>()
+  private readonly reportOwners = new Map<string, string>()
   private nextUserId = 1
   private nextReportId = 1
 
@@ -43,16 +45,65 @@ export class TestRepository implements Repository {
   }
 
   async createReport(userId: string, input: ReportInput) {
+    const user = this.users.find((candidate) => candidate.id === userId)
+    if (!user) throw new Error('Report owner does not exist')
     const report = {
       ...input,
       id: String(this.nextReportId++),
       date: '2026-10-26',
+      reporterName: user.name,
+      reporterControlNumber: user.controlNumber,
     }
+    this.reportOwners.set(report.id, userId)
     this.reports.unshift(report)
+    this.history.set(report.id, [{
+      id: `${report.id}-1`,
+      fromStatus: null,
+      toStatus: report.status,
+      changedBy: user.name,
+      changedAt: '2026-10-26 10:00:00',
+      comment: null,
+    }])
     return report
   }
 
-  async listReports(_userId: string) {
-    return [...this.reports]
+  async getReport(userId: string, role: UserRole, reportId: string) {
+    if (role === 'alumno' && this.reportOwners.get(reportId) !== userId) return null
+    return this.reports.find((report) => report.id === reportId) ?? null
+  }
+
+  async listReports(userId: string, role: UserRole, filters: ReportFilters) {
+    return this.reports.filter((report) => (
+      (role !== 'alumno' || this.reportOwners.get(report.id) === userId)
+      && (!filters.status || report.status === filters.status)
+      && (!filters.category || report.category === filters.category)
+      && (!filters.query || `${report.title} ${report.description} ${report.location} ${report.reporterName} ${report.reporterControlNumber}`.toLowerCase().includes(filters.query.toLowerCase()))
+    ))
+  }
+
+  async updateReportStatus(actorId: string, reportId: string, status: ReportStatus, comment: string | null) {
+    const report = this.reports.find((candidate) => candidate.id === reportId)
+    const actor = this.users.find((candidate) => candidate.id === actorId)
+    if (!report || !actor) return { error: 'not_found' as const }
+    if (report.status === status) return { error: 'unchanged' as const }
+
+    const previousStatus = report.status
+    report.status = status
+    const entries = this.history.get(reportId) ?? []
+    entries.push({
+      id: `${reportId}-${entries.length + 1}`,
+      fromStatus: previousStatus,
+      toStatus: status,
+      changedBy: actor.name,
+      changedAt: '2026-10-26 11:00:00',
+      comment,
+    })
+    this.history.set(reportId, entries)
+    return { report: { ...report } }
+  }
+
+  async listStatusHistory(userId: string, role: UserRole, reportId: string) {
+    if (role === 'alumno' && this.reportOwners.get(reportId) !== userId) return []
+    return [...(this.history.get(reportId) ?? [])]
   }
 }
