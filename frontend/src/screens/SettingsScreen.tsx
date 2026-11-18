@@ -6,6 +6,11 @@ type SettingsScreenProps = {
   student: Student
   onLogout: () => Promise<void>
   onManageUsers: () => void
+  onOpenAccount: () => void
+  onOpenPrivacy: () => void
+  onOpenNotifications: () => void
+  onOpenPreferences: () => void
+  onOpenHelp: () => void
   onOpenHome: () => void
   onOpenReports: () => void
   onCreateReport: () => void
@@ -14,62 +19,19 @@ type SettingsScreenProps = {
 type SettingItem = {
   title: string
   description: string
-  detail: string
   icon: IconName
+  onClick: () => void
 }
-
-const settingGroups: { heading: string; items: SettingItem[] }[] = [
-  {
-    heading: 'Cuenta',
-    items: [{
-      title: 'Datos de la cuenta',
-      description: 'Cambia tu nombre, correo y contraseña.',
-      detail: 'Tu cuenta pertenece al prototipo académico de ReportaYa.',
-      icon: 'user',
-    }],
-  },
-  {
-    heading: 'Privacidad',
-    items: [{
-      title: 'Privacidad',
-      description: 'Controla quién puede ver tu información y tus reportes.',
-      detail: 'La información que ingresas en esta maqueta solo permanece durante la sesión actual.',
-      icon: 'shield',
-    }],
-  },
-  {
-    heading: 'Notificaciones',
-    items: [{
-      title: 'Notificaciones',
-      description: 'Gestiona las alertas y avisos de la plataforma.',
-      detail: 'Las notificaciones se mostrarán cuando el sistema se conecte a un servicio real.',
-      icon: 'bell',
-    }],
-  },
-  {
-    heading: 'Preferencias',
-    items: [{
-      title: 'Preferencias',
-      description: 'Ajusta el idioma, tema y otras opciones.',
-      detail: 'La interfaz está disponible en español y se adapta al tamaño de tu pantalla.',
-      icon: 'settings',
-    }],
-  },
-  {
-    heading: 'Ayuda y soporte',
-    items: [{
-      title: 'Centro de ayuda',
-      description: 'Consulta preguntas frecuentes y contacta al soporte.',
-      detail: 'Para este avance, comparte tus comentarios con el equipo del proyecto.',
-      icon: 'help',
-    }],
-  },
-]
 
 export function SettingsScreen({
   student,
   onLogout,
   onManageUsers,
+  onOpenAccount,
+  onOpenPrivacy,
+  onOpenNotifications,
+  onOpenPreferences,
+  onOpenHelp,
   onOpenHome,
   onOpenReports,
   onCreateReport,
@@ -89,6 +51,14 @@ export function SettingsScreen({
       setLoggingOut(false)
     }
   }
+
+  const settingGroups: { heading: string; items: SettingItem[] }[] = [
+    { heading: 'Cuenta', items: [{ title: 'Datos de la cuenta', description: 'Actualiza tu nombre y contraseña.', icon: 'user', onClick: onOpenAccount }] },
+    { heading: 'Privacidad', items: [{ title: 'Privacidad', description: 'Revisa cómo se protegen tus reportes y datos.', icon: 'shield', onClick: onOpenPrivacy }] },
+    { heading: 'Notificaciones', items: [{ title: 'Notificaciones', description: 'Consulta los cambios recientes de tus reportes.', icon: 'bell', onClick: onOpenNotifications }] },
+    { heading: 'Preferencias', items: [{ title: 'Apariencia', description: 'Elige el tema claro u oscuro para este navegador.', icon: 'settings', onClick: onOpenPreferences }] },
+    { heading: 'Ayuda y soporte', items: [{ title: 'Centro de ayuda', description: 'Consulta preguntas frecuentes o envía una solicitud.', icon: 'help', onClick: onOpenHelp }] },
+  ]
 
   return (
     <div className="ry-app-shell">
@@ -125,16 +95,12 @@ export function SettingsScreen({
             <section className="ry-settings-group" key={group.heading}>
               <h2>{group.heading}</h2>
               {group.items.map((item) => {
-                const expanded = expandedItem === item.title
                 return (
-                  <div className="ry-setting-wrap" key={item.title}>
-                    <button aria-expanded={expanded} className="ry-setting-row" onClick={() => setExpandedItem(expanded ? null : item.title)} type="button">
-                      <span className="ry-setting-icon"><Icon name={item.icon} size={19} /></span>
-                      <span className="ry-setting-copy"><strong>{item.title}</strong><small>{item.description}</small></span>
-                      <Icon name="chevron" size={18} />
-                    </button>
-                    {expanded && <p className="ry-setting-detail">{item.detail}</p>}
-                  </div>
+                  <button className="ry-setting-row" key={item.title} onClick={item.onClick} type="button">
+                    <span className="ry-setting-icon"><Icon name={item.icon} size={19} /></span>
+                    <span className="ry-setting-copy"><strong>{item.title}</strong><small>{item.description}</small></span>
+                    <Icon name="chevron" size={18} />
+                  </button>
                 )
               })}
             </section>

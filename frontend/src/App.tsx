@@ -1,15 +1,28 @@
 import { useEffect, useState } from 'react'
-import { ApiError, createReport as saveReport, currentStudent, errorMessage, listReports, login, logout, register } from './api'
+import { ApiError, createReport as saveReport, currentStudent, errorMessage, listReports, login, logout, register, updateProfile } from './api'
+import { AccountSettingsScreen } from './screens/AccountSettingsScreen'
+import { HelpScreen } from './screens/HelpScreen'
 import { HomeScreen } from './screens/HomeScreen'
 import { LoginScreen } from './screens/LoginScreen'
 import { NewReportScreen, type NewReportInput } from './screens/NewReportScreen'
+import { NotificationsScreen } from './screens/NotificationsScreen'
+import { PreferencesScreen, type Theme } from './screens/PreferencesScreen'
+import { PrivacyScreen } from './screens/PrivacyScreen'
 import { RegisterScreen } from './screens/RegisterScreen'
 import { ReportDetailScreen } from './screens/ReportDetailScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { UsersScreen } from './screens/UsersScreen'
 import type { Report, Student } from './screens/reportTypes'
 
-type Screen = 'login' | 'register' | 'home' | 'reports' | 'settings' | 'create-report' | 'users' | 'report-detail'
+type Screen = 'login' | 'register' | 'home' | 'reports' | 'settings' | 'create-report' | 'users' | 'report-detail' | 'account' | 'privacy' | 'notifications' | 'preferences' | 'help'
+
+function getSavedTheme(): Theme {
+  try {
+    return localStorage.getItem('reportaya-theme') === 'dark' ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login')
@@ -18,6 +31,16 @@ function App() {
   const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [startupError, setStartupError] = useState('')
+  const [theme, setTheme] = useState<Theme>(getSavedTheme)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    try {
+      localStorage.setItem('reportaya-theme', theme)
+    } catch {
+      return
+    }
+  }, [theme])
 
   useEffect(() => {
     let active = true
@@ -70,6 +93,11 @@ function App() {
     setScreen('login')
   }
 
+  async function handleProfileUpdate(input: { name: string; currentPassword?: string; newPassword?: string }) {
+    const updatedStudent = await updateProfile(input)
+    setStudent(updatedStudent)
+  }
+
   async function handleSubmitReport(input: NewReportInput) {
     const savedReport = await saveReport({
       category: input.category,
@@ -98,6 +126,73 @@ function App() {
         onCreateReport={() => setScreen('create-report')}
         onManageUsers={() => setScreen('users')}
         onLogout={handleLogout}
+        onOpenAccount={() => setScreen('account')}
+        onOpenPrivacy={() => setScreen('privacy')}
+        onOpenNotifications={() => setScreen('notifications')}
+        onOpenPreferences={() => setScreen('preferences')}
+        onOpenHelp={() => setScreen('help')}
+        onOpenHome={() => setScreen('home')}
+        onOpenReports={() => setScreen('reports')}
+        student={student}
+      />
+    )
+  }
+
+  if (screen === 'account') {
+    return (
+      <AccountSettingsScreen
+        onBack={() => setScreen('settings')}
+        onOpenHome={() => setScreen('home')}
+        onOpenReports={() => setScreen('reports')}
+        onSave={handleProfileUpdate}
+        student={student}
+      />
+    )
+  }
+
+  if (screen === 'privacy') {
+    return (
+      <PrivacyScreen
+        onBack={() => setScreen('settings')}
+        onOpenHome={() => setScreen('home')}
+        onOpenReports={() => setScreen('reports')}
+        student={student}
+      />
+    )
+  }
+
+  if (screen === 'notifications') {
+    return (
+      <NotificationsScreen
+        onBack={() => setScreen('settings')}
+        onOpenHome={() => setScreen('home')}
+        onOpenReport={(reportId) => {
+          setSelectedReportId(reportId)
+          setScreen('report-detail')
+        }}
+        onOpenReports={() => setScreen('reports')}
+        student={student}
+      />
+    )
+  }
+
+  if (screen === 'preferences') {
+    return (
+      <PreferencesScreen
+        onBack={() => setScreen('settings')}
+        onOpenHome={() => setScreen('home')}
+        onOpenReports={() => setScreen('reports')}
+        onThemeChange={setTheme}
+        student={student}
+        theme={theme}
+      />
+    )
+  }
+
+  if (screen === 'help') {
+    return (
+      <HelpScreen
+        onBack={() => setScreen('settings')}
         onOpenHome={() => setScreen('home')}
         onOpenReports={() => setScreen('reports')}
         student={student}

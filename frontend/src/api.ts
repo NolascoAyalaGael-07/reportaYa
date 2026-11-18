@@ -64,6 +64,15 @@ export async function currentStudent(): Promise<Student> {
   return result.student
 }
 
+export async function updateProfile(input: {
+  name: string
+  currentPassword?: string
+  newPassword?: string
+}): Promise<Student> {
+  const result = await request<AuthResponse>('/api/auth/me', input, 'PATCH')
+  return result.student
+}
+
 export async function listUsers(): Promise<Student[]> {
   const result = await request<{ users: Student[] }>('/api/users')
   return result.users
@@ -88,6 +97,59 @@ export async function logout(): Promise<void> {
 export async function listReports(): Promise<Report[]> {
   const result = await request<{ reports: Report[] }>('/api/reports')
   return result.reports
+}
+
+export type UserNotification = {
+  id: string
+  reportId: string
+  title: string
+  message: string
+  createdAt: string
+  readAt: string | null
+}
+
+export type SupportRequest = {
+  id: string
+  subject: string
+  message: string
+  status: 'Abierta' | 'Resuelta'
+  createdAt: string
+  requesterName: string
+  requesterEmail: string
+}
+
+export async function listNotifications(): Promise<UserNotification[]> {
+  const result = await request<{ notifications: UserNotification[] }>('/api/notifications')
+  return result.notifications
+}
+
+export async function markNotificationRead(notificationId: string): Promise<void> {
+  await request<undefined>(`/api/notifications/${encodeURIComponent(notificationId)}/read`, {}, 'PATCH')
+}
+
+export async function markAllNotificationsRead(): Promise<void> {
+  await request<undefined>('/api/notifications/read-all', {})
+}
+
+export async function listSupportRequests(): Promise<SupportRequest[]> {
+  const result = await request<{ requests: SupportRequest[] }>('/api/support')
+  return result.requests
+}
+
+export async function createSupportRequest(subject: string, message: string): Promise<SupportRequest> {
+  const result = await request<{ request: SupportRequest }>('/api/support', { subject, message })
+  return result.request
+}
+
+export async function updateSupportRequestStatus(
+  requestId: string,
+  status: SupportRequest['status'],
+): Promise<void> {
+  await request<undefined>(
+    `/api/support/${encodeURIComponent(requestId)}/status`,
+    { status },
+    'PATCH',
+  )
 }
 
 export type StatusHistoryEntry = {
