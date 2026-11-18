@@ -9,6 +9,10 @@ export class TestRepository implements Repository {
   private nextUserId = 1
   private nextReportId = 1
 
+  async findUserById(id: string) {
+    return this.users.find((user) => user.id === id) ?? null
+  }
+
   async findUserByEmail(email: string) {
     return this.users.find((user) => user.email === email) ?? null
   }

@@ -11,7 +11,7 @@ const sessionLifetimeMs = 8 * 60 * 60 * 1000
 const allowedCategories = new Set(['Electricidad', 'Plomería', 'Limpieza', 'Mobiliario', 'Otro'])
 const reportStatuses = new Set<ReportStatus>(['Pendiente', 'En atención', 'Solucionado'])
 type Session = {
-  student: Student
+  studentId: string
   expiresAt: number
 }
 
@@ -212,7 +212,7 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
         passwordHash: await hashPassword(data.password),
       })
       const token = randomBytes(32).toString('base64url')
-      sessions.set(token, { student, expiresAt: Date.now() + sessionLifetimeMs })
+      sessions.set(token, { studentId: student.id, expiresAt: Date.now() + sessionLifetimeMs })
       setSessionCookie(response, token)
       return response.status(201).json({ student })
     } catch (error) {
@@ -233,7 +233,7 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
     }
 
     const token = randomBytes(32).toString('base64url')
-    sessions.set(token, { student: publicStudent(user), expiresAt: Date.now() + sessionLifetimeMs })
+    sessions.set(token, { studentId: user.id, expiresAt: Date.now() + sessionLifetimeMs })
     setSessionCookie(response, token)
     return response.json({ student: publicStudent(user) })
   })
@@ -245,7 +245,7 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
     return response.status(204).end()
   })
 
-  const requireSession = (request: Request, response: Response, next: NextFunction) => {
+  const requireSession = async (request: Request, response: Response, next: NextFunction) => {
     const token = getSessionToken(request)
     const session = token ? sessions.get(token) : undefined
     if (!session || session.expiresAt <= Date.now()) {
@@ -254,7 +254,14 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
       return response.status(401).json({ message: 'Inicia sesión para continuar.' })
     }
 
-    response.locals.student = session.student
+    const user = await repository.findUserById(session.studentId)
+    if (!user) {
+      if (token) sessions.delete(token)
+      clearSessionCookie(response)
+      return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    }
+
+    response.locals.student = publicStudent(user)
     return next()
   }
 

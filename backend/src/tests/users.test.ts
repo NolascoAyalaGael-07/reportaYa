@@ -83,6 +83,24 @@ test('el administrador cambia el rol y nadie puede cambiar su propio rol', async
   assert.equal(changed.status, 200)
   assert.equal((await changed.json()).student.role, 'mantenimiento')
 
+  const promoted = await fetch(`${baseUrl}/api/users/${studentId}/role`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({ role: 'administrador' }),
+  })
+  assert.equal(promoted.status, 200)
+  const refreshedSession = await fetch(`${baseUrl}/api/users`, { headers: { Cookie: studentCookie } })
+  assert.equal(refreshedSession.status, 200)
+
+  const demoted = await fetch(`${baseUrl}/api/users/${studentId}/role`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({ role: 'mantenimiento' }),
+  })
+  assert.equal(demoted.status, 200)
+  const revokedSession = await fetch(`${baseUrl}/api/users`, { headers: { Cookie: studentCookie } })
+  assert.equal(revokedSession.status, 403)
+
   const selfDemotion = await fetch(`${baseUrl}/api/users/${adminId}/role`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Cookie: adminCookie },

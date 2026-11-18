@@ -93,6 +93,15 @@ function toStudent(row: UserRow): Student {
 
 export function createMysqlRepository(pool: Pool): Repository {
   return {
+    async findUserById(id) {
+      const [rows] = await pool.execute<UserRow[]>(
+        'SELECT id, name, control_number AS controlNumber, email, password_hash AS passwordHash, role FROM users WHERE id = ? LIMIT 1',
+        [id],
+      )
+      const row = rows[0]
+      return row ? { ...toStudent(row), passwordHash: row.passwordHash } : null
+    },
+
     async findUserByEmail(email: string) {
       const [rows] = await pool.execute<UserRow[]>(
         'SELECT id, name, control_number AS controlNumber, email, password_hash AS passwordHash, role FROM users WHERE email = ? LIMIT 1',

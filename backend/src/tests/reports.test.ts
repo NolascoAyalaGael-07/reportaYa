@@ -82,7 +82,7 @@ test('no permite consultar ni crear reportes sin iniciar sesión', async () => {
 })
 
 test('impide que un usuario de mantenimiento cree reportes como alumno', async () => {
-  const user = repository.users.find((candidate) => candidate.email === 'reportes@ejemplo.com')
+  const user = repository.users.find((candidate) => candidate.email === 'mantenimiento@ejemplo.com')
   assert.ok(user)
   user.role = 'mantenimiento'
 
