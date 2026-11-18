@@ -36,6 +36,31 @@ test('no permite consultar ni crear reportes sin iniciar sesión', async () => {
   assert.equal(response.status, 401)
 })
 
+test('impide que un usuario de mantenimiento cree reportes como alumno', async () => {
+  const user = repository.users.find((candidate) => candidate.email === 'reportes@ejemplo.com')
+  assert.ok(user)
+  user.role = 'mantenimiento'
+
+  const login = await fetch(`${baseUrl}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: user.email, password: 'clave-segura-123' }),
+  })
+  const maintenanceCookie = login.headers.get('set-cookie')?.split(';')[0]
+  assert.ok(maintenanceCookie)
+
+  const response = await fetch(`${baseUrl}/api/reports`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Cookie: maintenanceCookie },
+    body: JSON.stringify({
+      category: 'Electricidad',
+      location: 'Edificio B',
+      description: 'Una lámpara está fundida.',
+    }),
+  })
+  assert.equal(response.status, 403)
+})
+
 test('crea y consulta reportes persistidos para la sesión', async () => {
   const created = await fetch(`${baseUrl}/api/reports`, {
     method: 'POST',

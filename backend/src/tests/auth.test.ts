@@ -45,6 +45,7 @@ test('registro guarda un hash, inicia sesión y protege la sesión con cookie Ht
   assert.match(response.headers.get('set-cookie') ?? '', /HttpOnly/)
   const registered = await response.json()
   assert.equal(registered.student.email, 'andrea@ejemplo.com')
+  assert.equal(registered.student.role, 'alumno')
   assert.equal('passwordHash' in registered.student, false)
   assert.notEqual(repository.users[0].passwordHash, 'clave-segura-123')
   assert.match(repository.users[0].passwordHash, /^[\da-f]{32}:[\da-f]{128}$/)

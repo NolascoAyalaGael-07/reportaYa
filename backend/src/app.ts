@@ -1,13 +1,11 @@
 import { randomBytes } from 'node:crypto'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import { hashPassword, verifyPassword } from './auth.js'
-import type { Repository, ReportInput, ReportStatus, Student, UserRecord } from './types.js'
+import type { Repository, ReportInput, ReportStatus, Student, UserRecord, UserRole } from './types.js'
 
 const sessionCookie = 'reportaya_session'
 const sessionLifetimeMs = 8 * 60 * 60 * 1000
 const allowedCategories = new Set(['Electricidad', 'Plomería', 'Limpieza', 'Mobiliario', 'Otro'])
-const reportStatuses = new Set<ReportStatus>(['Pendiente', 'En atención', 'Solucionado'])
-
 type Session = {
   student: Student
   expiresAt: number
@@ -112,6 +110,17 @@ function publicStudent(user: UserRecord): Student {
   return student
 }
 
+function requireRole(...roles: UserRole[]) {
+  return (_request: Request, response: Response, next: NextFunction) => {
+    const student = response.locals.student
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (!roles.includes(student.role)) {
+      return response.status(403).json({ message: 'No tienes permiso para realizar esta acción.' })
+    }
+    return next()
+  }
+}
+
 export function createApp(repository: Repository) {
   const app = express()
   const sessions = new Map<string, Session>()
@@ -191,7 +200,7 @@ export function createApp(repository: Repository) {
     return response.json({ reports })
   })
 
-  app.post('/api/reports', requireSession, async (request, response) => {
+  app.post('/api/reports', requireSession, requireRole('alumno'), async (request, response) => {
     const student = response.locals.student
     if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
     const parsed = parseReport(request.body)

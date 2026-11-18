@@ -1,5 +1,5 @@
 import mysql, { type Pool, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise'
-import type { Repository, ReportInput, ReportRecord, Student, UserRecord } from './types.js'
+import type { Repository, ReportInput, ReportRecord, Student, UserRecord, UserRole } from './types.js'
 
 type Environment = Record<string, string | undefined>
 
@@ -9,6 +9,7 @@ type UserRow = RowDataPacket & {
   controlNumber: string
   email: string
   passwordHash: string
+  role: UserRole
 }
 
 type ReportRow = RowDataPacket & {
@@ -51,6 +52,7 @@ function toStudent(row: UserRow): Student {
     name: row.name,
     controlNumber: row.controlNumber,
     email: row.email,
+    role: row.role,
   }
 }
 
@@ -58,16 +60,16 @@ export function createMysqlRepository(pool: Pool): Repository {
   return {
     async findUserByEmail(email: string) {
       const [rows] = await pool.execute<UserRow[]>(
-        'SELECT id, name, control_number AS controlNumber, email, password_hash AS passwordHash FROM users WHERE email = ? LIMIT 1',
+        'SELECT id, name, control_number AS controlNumber, email, password_hash AS passwordHash, role FROM users WHERE email = ? LIMIT 1',
         [email],
       )
       const row = rows[0]
       return row ? { ...toStudent(row), passwordHash: row.passwordHash } : null
     },
 
-    async createUser(input: Omit<UserRecord, 'id'>) {
+    async createUser(input: Omit<UserRecord, 'id' | 'role'>) {
       const [result] = await pool.execute<ResultSetHeader>(
-        'INSERT INTO users (name, control_number, email, password_hash) VALUES (?, ?, ?, ?)',
+        "INSERT INTO users (name, control_number, email, password_hash, role) VALUES (?, ?, ?, ?, 'alumno')",
         [input.name, input.controlNumber, input.email, input.passwordHash],
       )
       return {
@@ -75,6 +77,7 @@ export function createMysqlRepository(pool: Pool): Repository {
         name: input.name,
         controlNumber: input.controlNumber,
         email: input.email,
+        role: 'alumno',
       }
     },
 

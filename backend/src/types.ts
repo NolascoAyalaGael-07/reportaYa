@@ -1,8 +1,11 @@
+export type UserRole = 'alumno' | 'mantenimiento' | 'administrador'
+
 export type Student = {
   id: string
   name: string
   controlNumber: string
   email: string
+  role: UserRole
 }
 
 export type UserRecord = Student & {
@@ -26,7 +29,7 @@ export type ReportRecord = ReportInput & {
 
 export interface Repository {
   findUserByEmail(email: string): Promise<UserRecord | null>
-  createUser(input: Omit<UserRecord, 'id'>): Promise<Student>
+  createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student>
   createReport(userId: string, input: ReportInput): Promise<ReportRecord>
   listReports(userId: string): Promise<ReportRecord[]>
 }

@@ -10,12 +10,12 @@ export class TestRepository implements Repository {
     return this.users.find((user) => user.email === email) ?? null
   }
 
-  async createUser(input: Omit<UserRecord, 'id'>): Promise<Student> {
+  async createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student> {
     if (this.users.some((user) => user.email === input.email || user.controlNumber === input.controlNumber)) {
       throw Object.assign(new Error('Duplicate entry'), { code: 'ER_DUP_ENTRY' })
     }
 
-    const user = { ...input, id: String(this.nextUserId++) }
+    const user = { ...input, id: String(this.nextUserId++), role: 'alumno' as const }
     this.users.push(user)
     const { passwordHash: _passwordHash, ...student } = user
     return student
