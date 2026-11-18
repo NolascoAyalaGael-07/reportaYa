@@ -1,54 +1,72 @@
-# reportaYa
+# ReportaYa
 
-Primera maqueta navegable de ReportaYa para presentar el concepto del proyecto en clase.
+Aplicación para que alumnos reporten problemas de la escuela y el personal les dé seguimiento.
 
-## Estructura
+## Funcionalidades
 
-- `frontend`: interfaz React + TypeScript + Tailwind CSS.
-- `backend`: API en Node.js + TypeScript conectada a MySQL para cuentas y reportes.
-- `database`: script SQL para crear las tablas de MySQL usadas en este avance.
+- Registro de alumnos e inicio/cierre de sesión.
+- Roles: **alumno**, **mantenimiento** y **administrador**. El registro público siempre crea alumnos.
+- Reportes asociados a su autor, con categoría, ubicación, descripción y fotografía opcional.
+- Consulta de reportes propios para alumnos y bandeja general con búsqueda y filtros para mantenimiento/administración.
+- Cambios de estado con comentario e historial visible para el alumno que creó el reporte.
+- Asignación y revocación de roles de personal desde la cuenta de administrador.
+- Contraseñas con hash scrypt, sesiones de 8 horas en MySQL y fotografías guardadas en `backend/uploads`.
 
-## Ejecutar la maqueta
+Los reportes y las imágenes solo son accesibles con sesión; un alumno únicamente puede consultar los reportes que creó. Las imágenes aceptadas son JPG/PNG de hasta 5 MB.
 
-1. En una terminal, instala las dependencias del frontend:
+## Preparar MySQL
 
-   ```bash
+La base que ya creaste con `database/mysql_setup.sql` conserva tus usuarios y reportes. Ejecuta **una vez** estos scripts en MySQL Workbench para actualizarla sin borrar los datos existentes:
+
+1. `database/mysql_migration_roles.sql`
+2. `database/mysql_migration_auth_sessions.sql`
+3. `database/mysql_migration_report_history.sql`
+4. `database/mysql_migration_report_images.sql`
+
+Los scripts de migración se pueden volver a ejecutar. Para una instalación nueva, ejecuta solamente `database/mysql_setup.sql`, que crea el esquema completo.
+
+## Crear al primer administrador
+
+1. Inicia la aplicación y registra una cuenta normal desde **Crear una cuenta**.
+2. Abre `database/promote_initial_admin.sql`, reemplaza `REEMPLAZA_CON_CORREO_REGISTRADO` por el correo registrado y ejecuta el script.
+3. La cuenta ya puede abrir **Mi cuenta → Gestionar usuarios** y promover otras cuentas registradas a mantenimiento o administración. No hay un selector de rol en el registro público.
+
+El script informa `accounts_promoted`: debe mostrar `1`. Si muestra `0`, comprueba el correo y que la cuenta exista antes de continuar.
+
+## Configurar y ejecutar
+
+1. Copia `backend/.env.example` a `backend/.env`; completa `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD` y `MYSQL_DATABASE`. No subas ni compartas `backend/.env`.
+2. Desde una terminal, inicia el backend:
+
+   ```powershell
+   cd backend
+   npm install
+   npm run dev
+   ```
+
+   El servidor comprueba la conexión a MySQL antes de aceptar solicitudes. `UPLOADS_DIRECTORY` es opcional; por defecto, las fotografías se guardan en `backend/uploads`, carpeta ignorada por Git.
+
+3. En otra terminal, inicia el frontend:
+
+   ```powershell
    cd frontend
    npm install
    npm run dev
    ```
 
-2. Abre la URL que muestre Vite, normalmente `http://localhost:5173`.
+4. Abre la URL que muestra Vite, normalmente `http://localhost:5173`.
 
-## Probar la versión con MySQL
+Vite reenvía `/api` al backend en `http://localhost:3001`. Para esta versión local, frontend y backend se usan bajo el mismo origen. Las sesiones se guardan en MySQL, vencen a las 8 horas y se actualiza el rol efectivo en cada solicitud. Las cookies son `HttpOnly` y `SameSite=Lax`; en producción HTTPS se agrega `Secure`.
 
-1. Ejecuta `database/mysql_setup.sql` en MySQL Workbench para crear las tablas `users` y `reports` en la base `reportaya`.
-2. Copia `backend/.env.example` como `backend/.env` y completa host, usuario, contraseña y nombre de tu base de datos. No subas el archivo `.env` al repositorio.
-3. En una terminal, inicia el backend:
+## Pruebas automatizadas
 
-```bash
-cd backend
-npm install
-npm run dev
-```
-
-4. En otra terminal, inicia la interfaz:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Abre la dirección que muestra Vite, normalmente `http://localhost:5173`. Vite reenvía `/api` al backend en `http://localhost:3001`. Para crear una cuenta de prueba, registra un correo y número de control que no estén usados; después podrás iniciar sesión, crear reportes y consultar los reportes guardados de esa cuenta.
-
-Las sesiones usan una cookie `HttpOnly` temporal y se invalidan cuando se detiene el backend. Las contraseñas se guardan con scrypt; el servidor no las devuelve al frontend. Los reportes se guardan en MySQL, pero la foto sigue siendo solo una vista previa local en este avance.
-
-## Pruebas automatizadas del backend
-
-```bash
+```powershell
 cd backend
 npm test
 ```
 
-Las pruebas usan un repositorio en memoria y no necesitan que MySQL esté iniciado. Cubren validación, registro, inicio de sesión, sesiones y creación/consulta de reportes. Para la aplicación normal, sí necesitas configurar una base de datos MySQL en `backend/.env`.
+Las pruebas `.test.ts` se compilan y ejecutan con Node; usan un repositorio en memoria y no necesitan credenciales ni un servidor MySQL. Cubren login, roles, privacidad de reportes, cambios de estado, historial y límites/acceso a fotografías. No sustituyen una prueba de integración con tu instancia MySQL.
+
+## Alcance del avance
+
+El backend es Node.js, Express y TypeScript; el frontend es React, TypeScript y Vite. La persistencia está implementada para cuentas, sesiones, reportes y estados en MySQL. Las fotografías se guardan como archivos en el servidor y MySQL almacena su nombre; realiza respaldos de `backend/uploads` junto con la base. No se incluyen despliegue público, recuperación de contraseñas ni notificaciones externas.

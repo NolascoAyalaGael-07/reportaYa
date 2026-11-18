@@ -52,8 +52,8 @@ function toReport(row: ReportRow): ReportRecord {
 const reportSelect = `
   SELECT r.id, r.title, r.category, r.location, r.description, r.status,
     DATE_FORMAT(r.created_at, "%Y-%m-%d") AS date,
-    u.name AS reporterName, u.control_number AS reporterControlNumber
-    , r.photo_path AS photoPath
+    u.name AS reporterName, u.control_number AS reporterControlNumber,
+    r.photo_path AS photoPath
   FROM reports r JOIN users u ON u.id = r.user_id
 `
 
@@ -78,6 +78,8 @@ export function createPool(environment: Environment): Pool {
     connectionLimit: 10,
     queueLimit: 0,
     dateStrings: true,
+    supportBigNumbers: true,
+    bigNumberStrings: true,
   })
 }
 

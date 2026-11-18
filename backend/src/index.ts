@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import { resolve } from 'node:path'
 import { createApp } from './app.js'
 import { createMysqlRepository, createPool } from './mysqlRepository.js'
 
@@ -9,7 +10,11 @@ if (!Number.isInteger(port) || port < 1 || port > 65_535) {
 }
 
 const pool = createPool(process.env)
-const app = createApp(createMysqlRepository(pool))
+await pool.query('SELECT 1')
+const uploadDirectory = process.env.UPLOADS_DIRECTORY
+  ? resolve(process.env.UPLOADS_DIRECTORY)
+  : resolve(process.cwd(), 'uploads')
+const app = createApp(createMysqlRepository(pool), { uploadDirectory })
 
 const server = app.listen(port, () => {
   console.log(`ReportaYa API disponible en http://localhost:${port}`)
