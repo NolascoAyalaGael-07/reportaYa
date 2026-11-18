@@ -9,7 +9,12 @@ Aplicación para que alumnos reporten problemas de la escuela y el personal les 
 - Reportes asociados a su autor, con categoría, ubicación, descripción y fotografía opcional.
 - Consulta de reportes propios para alumnos y bandeja general con búsqueda y filtros para mantenimiento/administración.
 - Cambios de estado con comentario e historial visible para el alumno que creó el reporte.
+- Notificaciones dentro de la aplicación cuando el personal actualiza un reporte; se pueden marcar como leídas.
+- Edición del nombre y cambio de contraseña validando la contraseña actual. El correo y el número de control permanecen inmutables.
 - Asignación y revocación de roles de personal desde la cuenta de administrador.
+- Centro de ayuda con preguntas frecuentes y solicitudes que administración puede revisar y resolver.
+- Preferencia de tema claro u oscuro guardada en el navegador.
+- En **Mi cuenta** se puede editar el nombre, actualizar la contraseña validando la actual, revisar la política de privacidad, consultar notificaciones y administrar preferencias y solicitudes de ayuda.
 - Contraseñas con hash scrypt, sesiones de 8 horas en MySQL y fotografías guardadas en `backend/uploads`.
 
 Los reportes y las imágenes solo son accesibles con sesión; un alumno únicamente puede consultar los reportes que creó. Las imágenes aceptadas son JPG/PNG de hasta 5 MB.
@@ -22,6 +27,8 @@ La base que ya creaste con `database/mysql_setup.sql` conserva tus usuarios y re
 2. `database/mysql_migration_auth_sessions.sql`
 3. `database/mysql_migration_report_history.sql`
 4. `database/mysql_migration_report_images.sql`
+5. `database/mysql_migration_account_features.sql`
+5. `database/mysql_migration_account_features.sql`
 
 Los scripts de migración se pueden volver a ejecutar. Para una instalación nueva, ejecuta solamente `database/mysql_setup.sql`, que crea el esquema completo.
 
@@ -65,8 +72,8 @@ cd backend
 npm test
 ```
 
-Las pruebas `.test.ts` se compilan y ejecutan con Node; usan un repositorio en memoria y no necesitan credenciales ni un servidor MySQL. Cubren login, roles, privacidad de reportes, cambios de estado, historial y límites/acceso a fotografías. No sustituyen una prueba de integración con tu instancia MySQL.
+Las pruebas `.test.ts` se compilan y ejecutan con Node; usan un repositorio en memoria y no necesitan credenciales ni un servidor MySQL. Cubren login, edición de cuenta, roles, privacidad de reportes, cambios de estado, historial, notificaciones, soporte y límites/acceso a fotografías. No sustituyen una prueba de integración con tu instancia MySQL.
 
 ## Alcance del avance
 
-El backend es Node.js, Express y TypeScript; el frontend es React, TypeScript y Vite. La persistencia está implementada para cuentas, sesiones, reportes y estados en MySQL. Las fotografías se guardan como archivos en el servidor y MySQL almacena su nombre; realiza respaldos de `backend/uploads` junto con la base. No se incluyen despliegue público, recuperación de contraseñas ni notificaciones externas.
+El backend es Node.js, Express y TypeScript; el frontend es React, TypeScript y Vite. La persistencia está implementada para cuentas, sesiones, reportes, estados, notificaciones y solicitudes de soporte en MySQL. Las fotografías se guardan como archivos en el servidor y MySQL almacena su nombre; realiza respaldos de `backend/uploads` junto con la base. Las notificaciones son internas a la aplicación; no se incluyen correo automático, despliegue público ni recuperación de contraseñas.
