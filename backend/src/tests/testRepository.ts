@@ -1,14 +1,18 @@
-import type { Repository, ReportFilters, ReportInput, ReportRecord, ReportStatus, Student, StatusHistoryEntry, UserRecord, UserRole } from '../types.js'
+import type { Repository, ReportFilters, ReportInput, ReportRecord, ReportStatus, Student, StatusHistoryEntry, SupportRequest, UserNotification, UserRecord, UserRole } from '../types.js'
 
 export class TestRepository implements Repository {
   readonly users: UserRecord[] = []
   readonly reports: ReportRecord[] = []
   readonly sessions = new Map<string, { userId: string; expiresAt: number }>()
   readonly history = new Map<string, StatusHistoryEntry[]>()
+  readonly notifications: UserNotification[] = []
+  readonly supportRequests: SupportRequest[] = []
   private readonly reportOwners = new Map<string, string>()
   private readonly reportPhotos = new Map<string, string>()
   private nextUserId = 1
   private nextReportId = 1
+  private nextNotificationId = 1
+  private nextSupportRequestId = 1
 
   async findUserById(id: string) {
     return this.users.find((user) => user.id === id) ?? null
@@ -33,6 +37,15 @@ export class TestRepository implements Repository {
 
   async deleteSession(tokenHash: string) {
     this.sessions.delete(tokenHash)
+  }
+
+  async updateAccount(id: string, name: string, passwordHash: string | null) {
+    const user = this.users.find((candidate) => candidate.id === id)
+    if (!user) return null
+    user.name = name
+    if (passwordHash) user.passwordHash = passwordHash
+    const { passwordHash: _passwordHash, ...student } = user
+    return student
   }
 
   async createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student> {
@@ -130,11 +143,73 @@ export class TestRepository implements Repository {
       comment,
     })
     this.history.set(reportId, entries)
+    const ownerId = this.reportOwners.get(reportId)
+    if (ownerId && ownerId !== actorId) {
+      this.notifications.unshift({
+        id: String(this.nextNotificationId++),
+        reportId,
+        title: 'Actualización de tu reporte',
+        message: comment
+          ? `El estado cambió de ${previousStatus} a ${status}. ${comment}`
+          : `El estado cambió de ${previousStatus} a ${status}.`,
+        createdAt: '2026-10-26 11:00:00',
+        readAt: null,
+      })
+    }
     return { report: { ...report } }
   }
 
   async listStatusHistory(userId: string, role: UserRole, reportId: string) {
     if (role === 'alumno' && this.reportOwners.get(reportId) !== userId) return []
     return [...(this.history.get(reportId) ?? [])]
+  }
+
+  async listNotifications(userId: string) {
+    return this.notifications.filter((notification) => this.reportOwners.get(notification.reportId) === userId)
+  }
+
+  async markNotificationRead(userId: string, notificationId: string) {
+    const notification = this.notifications.find((item) => item.id === notificationId)
+    if (!notification || this.reportOwners.get(notification.reportId) !== userId) return false
+    notification.readAt ??= '2026-10-26 12:00:00'
+    return true
+  }
+
+  async markAllNotificationsRead(userId: string) {
+    for (const notification of this.notifications) {
+      if (this.reportOwners.get(notification.reportId) === userId) {
+        notification.readAt ??= '2026-10-26 12:00:00'
+      }
+    }
+  }
+
+  async createSupportRequest(userId: string, subject: string, message: string) {
+    const requester = this.users.find((user) => user.id === userId)
+    if (!requester) throw new Error('Support request owner does not exist')
+    const supportRequest = {
+      id: String(this.nextSupportRequestId++),
+      subject,
+      message,
+      status: 'Abierta' as const,
+      createdAt: '2026-10-26 12:00:00',
+      requesterName: requester.name,
+      requesterEmail: requester.email,
+    }
+    this.supportRequests.unshift(supportRequest)
+    return supportRequest
+  }
+
+  async listSupportRequests(userId: string, role: UserRole) {
+    return this.supportRequests.filter((request) => (
+      role === 'administrador'
+      || this.users.find((user) => user.email === request.requesterEmail)?.id === userId
+    ))
+  }
+
+  async updateSupportRequestStatus(requestId: string, status: SupportRequest['status']) {
+    const supportRequest = this.supportRequests.find((request) => request.id === requestId)
+    if (!supportRequest) return false
+    supportRequest.status = status
+    return true
   }
 }

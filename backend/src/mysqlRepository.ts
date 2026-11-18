@@ -1,5 +1,5 @@
 import mysql, { type Pool, type ResultSetHeader, type RowDataPacket } from 'mysql2/promise'
-import type { Repository, ReportFilters, ReportInput, ReportRecord, Student, StatusHistoryEntry, UserRecord, UserRole } from './types.js'
+import type { Repository, ReportFilters, ReportInput, ReportRecord, Student, StatusHistoryEntry, SupportRequest, UserNotification, UserRecord, UserRole } from './types.js'
 
 type Environment = Record<string, string | undefined>
 
@@ -33,6 +33,9 @@ type HistoryRow = RowDataPacket & {
   changedAt: string
   comment: string | null
 }
+
+type NotificationRow = RowDataPacket & UserNotification
+type SupportRequestRow = RowDataPacket & SupportRequest
 
 function toReport(row: ReportRow): ReportRecord {
   return {
@@ -132,6 +135,18 @@ export function createMysqlRepository(pool: Pool): Repository {
 
     async deleteSession(tokenHash) {
       await pool.execute('DELETE FROM auth_sessions WHERE token_hash = ?', [tokenHash])
+    },
+
+    async updateAccount(id, name, passwordHash) {
+      await pool.execute(
+        'UPDATE users SET name = ?, password_hash = COALESCE(?, password_hash) WHERE id = ?',
+        [name, passwordHash, id],
+      )
+      return this.findUserById(id).then((user) => {
+        if (!user) return null
+        const { passwordHash: _passwordHash, ...student } = user
+        return student
+      })
     },
 
     async createUser(input: Omit<UserRecord, 'id' | 'role'>) {
@@ -273,10 +288,10 @@ export function createMysqlRepository(pool: Pool): Repository {
       try {
         await connection.beginTransaction()
         const [rows] = await connection.execute<RowDataPacket[]>(
-          'SELECT status FROM reports WHERE id = ? FOR UPDATE',
+          'SELECT status, user_id AS userId FROM reports WHERE id = ? FOR UPDATE',
           [reportId],
         )
-        const row = rows[0] as { status: ReportRecord['status'] } | undefined
+        const row = rows[0] as { status: ReportRecord['status']; userId: string } | undefined
         if (!row) {
           await connection.rollback()
           return { error: 'not_found' as const }
@@ -291,6 +306,15 @@ export function createMysqlRepository(pool: Pool): Repository {
           'INSERT INTO report_status_history (report_id, from_status, to_status, changed_by, comment) VALUES (?, ?, ?, ?, ?)',
           [reportId, row.status, status, actorId, comment],
         )
+        if (String(row.userId) !== actorId) {
+          const message = comment
+            ? `El estado cambió de ${row.status} a ${status}. ${comment}`
+            : `El estado cambió de ${row.status} a ${status}.`
+          await connection.execute(
+            'INSERT INTO user_notifications (user_id, report_id, title, message) VALUES (?, ?, ?, ?)',
+            [row.userId, reportId, 'Actualización de tu reporte', message],
+          )
+        }
         const [updatedRows] = await connection.execute<ReportRow[]>(
           `${reportSelect} WHERE r.id = ? LIMIT 1`,
           [reportId],
@@ -324,6 +348,87 @@ export function createMysqlRepository(pool: Pool): Repository {
         ...row,
         id: String(row.id),
       }))
+    },
+
+    async listNotifications(userId) {
+      const [rows] = await pool.execute<NotificationRow[]>(
+        `SELECT id, report_id AS reportId, title, message,
+          DATE_FORMAT(created_at, "%Y-%m-%d %H:%i:%s") AS createdAt,
+          DATE_FORMAT(read_at, "%Y-%m-%d %H:%i:%s") AS readAt
+        FROM user_notifications
+        WHERE user_id = ?
+        ORDER BY created_at DESC, id DESC
+        LIMIT 100`,
+        [userId],
+      )
+      return rows.map((row) => ({ ...row, id: String(row.id), reportId: String(row.reportId) }))
+    },
+
+    async markNotificationRead(userId, notificationId) {
+      const [rows] = await pool.execute<RowDataPacket[]>(
+        'SELECT id FROM user_notifications WHERE id = ? AND user_id = ? LIMIT 1',
+        [notificationId, userId],
+      )
+      if (rows.length === 0) return false
+      await pool.execute(
+        'UPDATE user_notifications SET read_at = COALESCE(read_at, CURRENT_TIMESTAMP) WHERE id = ? AND user_id = ?',
+        [notificationId, userId],
+      )
+      return true
+    },
+
+    async markAllNotificationsRead(userId) {
+      await pool.execute(
+        'UPDATE user_notifications SET read_at = CURRENT_TIMESTAMP WHERE user_id = ? AND read_at IS NULL',
+        [userId],
+      )
+    },
+
+    async createSupportRequest(userId, subject, message) {
+      const [result] = await pool.execute<ResultSetHeader>(
+        'INSERT INTO support_requests (user_id, subject, message) VALUES (?, ?, ?)',
+        [userId, subject, message],
+      )
+      const [rows] = await pool.execute<SupportRequestRow[]>(
+        `SELECT s.id, s.subject, s.message, s.status,
+          DATE_FORMAT(s.created_at, "%Y-%m-%d %H:%i:%s") AS createdAt,
+          u.name AS requesterName, u.email AS requesterEmail
+        FROM support_requests s JOIN users u ON u.id = s.user_id
+        WHERE s.id = ? LIMIT 1`,
+        [result.insertId],
+      )
+      const row = rows[0]
+      if (!row) throw new Error('MySQL no devolvió la solicitud de soporte recién creada.')
+      return { ...row, id: String(row.id) }
+    },
+
+    async listSupportRequests(userId, role) {
+      const ownerFilter = role === 'administrador' ? '' : 'WHERE s.user_id = ?'
+      const parameters = role === 'administrador' ? [] : [userId]
+      const [rows] = await pool.execute<SupportRequestRow[]>(
+        `SELECT s.id, s.subject, s.message, s.status,
+          DATE_FORMAT(s.created_at, "%Y-%m-%d %H:%i:%s") AS createdAt,
+          u.name AS requesterName, u.email AS requesterEmail
+        FROM support_requests s JOIN users u ON u.id = s.user_id
+        ${ownerFilter}
+        ORDER BY s.created_at DESC, s.id DESC
+        LIMIT 100`,
+        parameters,
+      )
+      return rows.map((row) => ({ ...row, id: String(row.id) }))
+    },
+
+    async updateSupportRequestStatus(requestId, status) {
+      const [result] = status === 'Resuelta'
+        ? await pool.execute<ResultSetHeader>(
+          'UPDATE support_requests SET status = ?, resolved_at = COALESCE(resolved_at, CURRENT_TIMESTAMP) WHERE id = ?',
+          [status, requestId],
+        )
+        : await pool.execute<ResultSetHeader>(
+          'UPDATE support_requests SET status = ?, resolved_at = NULL WHERE id = ?',
+          [status, requestId],
+        )
+      return result.affectedRows > 0
     },
   }
 }

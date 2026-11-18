@@ -4,7 +4,7 @@ import { basename, resolve } from 'node:path'
 import express, { type NextFunction, type Request, type Response } from 'express'
 import multer from 'multer'
 import { hashPassword, verifyPassword } from './auth.js'
-import type { Repository, ReportInput, ReportStatus, Student, UserRecord, UserRole } from './types.js'
+import type { Repository, ReportInput, ReportStatus, Student, SupportRequest, UserRecord, UserRole } from './types.js'
 
 const sessionCookie = 'reportaya_session'
 const sessionLifetimeMs = 8 * 60 * 60 * 1000
@@ -70,6 +70,42 @@ function parseLogin(value: unknown): { email: string; password: string } | null 
   return { email, password: value.password }
 }
 
+type ProfileUpdate = {
+  name: string
+  currentPassword?: string
+  newPassword?: string
+}
+
+function parseProfileUpdate(value: unknown): { data?: ProfileUpdate; error?: string } {
+  if (!isRecord(value)) return { error: 'Completa tu nombre.' }
+  if ('email' in value || 'controlNumber' in value) {
+    return { error: 'El correo y el número de control no se pueden cambiar desde esta pantalla.' }
+  }
+  if (typeof value.name !== 'string' || value.name.trim().length < 2 || value.name.trim().length > 150) {
+    return { error: 'El nombre debe tener entre 2 y 150 caracteres.' }
+  }
+  if (value.currentPassword !== undefined && typeof value.currentPassword !== 'string') {
+    return { error: 'Escribe tu contraseña actual.' }
+  }
+  if (value.newPassword !== undefined && typeof value.newPassword !== 'string') {
+    return { error: 'La nueva contraseña no es válida.' }
+  }
+  if (value.newPassword !== undefined && (value.newPassword.length < 8 || value.newPassword.length > 128)) {
+    return { error: 'La nueva contraseña debe tener entre 8 y 128 caracteres.' }
+  }
+  if ((value.currentPassword === undefined) !== (value.newPassword === undefined)) {
+    return { error: 'Para cambiar la contraseña, completa la actual y la nueva.' }
+  }
+
+  return {
+    data: {
+      name: value.name.trim(),
+      ...(typeof value.currentPassword === 'string' ? { currentPassword: value.currentPassword } : {}),
+      ...(typeof value.newPassword === 'string' ? { newPassword: value.newPassword } : {}),
+    },
+  }
+}
+
 function parseReport(value: unknown): { data?: ReportInput; error?: string } {
   if (!isRecord(value)) return { error: 'Completa los datos del reporte.' }
 
@@ -126,6 +162,26 @@ function parseReportFilters(query: Request['query']): { data?: { status?: Report
       ...(typeof q === 'string' && q.trim() ? { query: q.trim() } : {}),
     },
   }
+}
+
+function parseSupportRequest(value: unknown): { data?: { subject: string; message: string }; error?: string } {
+  if (!isRecord(value) || typeof value.subject !== 'string' || typeof value.message !== 'string') {
+    return { error: 'Escribe un asunto y una descripción para tu solicitud.' }
+  }
+  const subject = value.subject.trim()
+  const message = value.message.trim()
+  if (subject.length < 4 || subject.length > 120) {
+    return { error: 'El asunto debe tener entre 4 y 120 caracteres.' }
+  }
+  if (message.length < 10 || message.length > 2000) {
+    return { error: 'El mensaje debe tener entre 10 y 2000 caracteres.' }
+  }
+  return { data: { subject, message } }
+}
+
+function parseSupportStatus(value: unknown): SupportRequest['status'] | null {
+  if (!isRecord(value) || (value.status !== 'Abierta' && value.status !== 'Resuelta')) return null
+  return value.status
 }
 
 function isDuplicateEntry(error: unknown): boolean {
@@ -272,6 +328,28 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
     return response.json({ student: response.locals.student })
   })
 
+  app.patch('/api/auth/me', requireSession, async (request, response) => {
+    const student = response.locals.student
+    const parsed = parseProfileUpdate(request.body)
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (!parsed.data) return response.status(400).json({ message: parsed.error })
+    const account = await repository.findUserById(student.id)
+    if (!account) return response.status(404).json({ message: 'No se encontró la cuenta.' })
+
+    if (parsed.data.newPassword) {
+      if (!await verifyPassword(parsed.data.currentPassword ?? '', account.passwordHash)) {
+        return response.status(400).json({ message: 'La contraseña actual es incorrecta.' })
+      }
+    }
+
+    const passwordHash = parsed.data.newPassword
+      ? await hashPassword(parsed.data.newPassword)
+      : null
+    const updatedStudent = await repository.updateAccount(student.id, parsed.data.name, passwordHash)
+    if (!updatedStudent) return response.status(404).json({ message: 'No se encontró la cuenta.' })
+    return response.json({ student: updatedStudent })
+  })
+
   app.get('/api/users', requireSession, requireRole('administrador'), async (_request, response) => {
     return response.json({ users: await repository.listUsers() })
   })
@@ -295,6 +373,59 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
       return response.status(result.error === 'not_found' ? 404 : 409).json({ message: messages[result.error] })
     }
     return response.json({ student: result.student })
+  })
+
+  app.get('/api/notifications', requireSession, async (_request, response) => {
+    const student = response.locals.student
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    return response.json({ notifications: await repository.listNotifications(student.id) })
+  })
+
+  app.patch('/api/notifications/:id/read', requireSession, async (request, response) => {
+    const student = response.locals.student
+    const notificationId = request.params.id
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (typeof notificationId !== 'string' || !/^[1-9]\d*$/.test(notificationId)) {
+      return response.status(400).json({ message: 'Selecciona una notificación válida.' })
+    }
+    if (!await repository.markNotificationRead(student.id, notificationId)) {
+      return response.status(404).json({ message: 'No se encontró esa notificación.' })
+    }
+    return response.status(204).end()
+  })
+
+  app.post('/api/notifications/read-all', requireSession, async (_request, response) => {
+    const student = response.locals.student
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    await repository.markAllNotificationsRead(student.id)
+    return response.status(204).end()
+  })
+
+  app.get('/api/support', requireSession, async (_request, response) => {
+    const student = response.locals.student
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    return response.json({ requests: await repository.listSupportRequests(student.id, student.role) })
+  })
+
+  app.post('/api/support', requireSession, async (request, response) => {
+    const student = response.locals.student
+    const parsed = parseSupportRequest(request.body)
+    if (!student) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (!parsed.data) return response.status(400).json({ message: parsed.error })
+    const supportRequest = await repository.createSupportRequest(student.id, parsed.data.subject, parsed.data.message)
+    return response.status(201).json({ request: supportRequest })
+  })
+
+  app.patch('/api/support/:id/status', requireSession, requireRole('administrador'), async (request, response) => {
+    const requestId = request.params.id
+    const status = parseSupportStatus(request.body)
+    if (typeof requestId !== 'string' || !/^[1-9]\d*$/.test(requestId) || !status) {
+      return response.status(400).json({ message: 'Selecciona una solicitud y un estado válidos.' })
+    }
+    if (!await repository.updateSupportRequestStatus(requestId, status)) {
+      return response.status(404).json({ message: 'No se encontró esa solicitud.' })
+    }
+    return response.status(204).end()
   })
 
   app.get('/api/reports', requireSession, async (_request, response) => {

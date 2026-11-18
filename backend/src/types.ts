@@ -45,12 +45,32 @@ export type StatusHistoryEntry = {
   comment: string | null
 }
 
+export type UserNotification = {
+  id: string
+  reportId: string
+  title: string
+  message: string
+  createdAt: string
+  readAt: string | null
+}
+
+export type SupportRequest = {
+  id: string
+  subject: string
+  message: string
+  status: 'Abierta' | 'Resuelta'
+  createdAt: string
+  requesterName: string
+  requesterEmail: string
+}
+
 export interface Repository {
   findUserById(id: string): Promise<UserRecord | null>
   findUserByEmail(email: string): Promise<UserRecord | null>
   createSession(tokenHash: string, userId: string, expiresAt: number): Promise<void>
   findSession(tokenHash: string): Promise<{ userId: string } | null>
   deleteSession(tokenHash: string): Promise<void>
+  updateAccount(id: string, name: string, passwordHash: string | null): Promise<Student | null>
   createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student>
   listUsers(): Promise<Student[]>
   updateUserRole(actorId: string, targetId: string, role: UserRole): Promise<
@@ -64,6 +84,12 @@ export interface Repository {
     { report: ReportRecord } | { error: 'not_found' | 'unchanged' }
   >
   listStatusHistory(userId: string, role: UserRole, reportId: string): Promise<StatusHistoryEntry[]>
+  listNotifications(userId: string): Promise<UserNotification[]>
+  markNotificationRead(userId: string, notificationId: string): Promise<boolean>
+  markAllNotificationsRead(userId: string): Promise<void>
+  createSupportRequest(userId: string, subject: string, message: string): Promise<SupportRequest>
+  listSupportRequests(userId: string, role: UserRole): Promise<SupportRequest[]>
+  updateSupportRequestStatus(requestId: string, status: SupportRequest['status']): Promise<boolean>
 }
 
 declare global {
