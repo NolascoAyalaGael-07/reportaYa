@@ -6,6 +6,8 @@ import type { Student } from './reportTypes'
 type UsersScreenProps = {
   currentUser: Student
   onBack: () => void
+  onOpenHome: () => void
+  onOpenReports: () => void
 }
 
 const roleLabels: Record<Student['role'], string> = {
@@ -14,7 +16,7 @@ const roleLabels: Record<Student['role'], string> = {
   administrador: 'Administrador',
 }
 
-export function UsersScreen({ currentUser, onBack }: UsersScreenProps) {
+export function UsersScreen({ currentUser, onBack, onOpenHome, onOpenReports }: UsersScreenProps) {
   const [users, setUsers] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -95,10 +97,9 @@ export function UsersScreen({ currentUser, onBack }: UsersScreenProps) {
           </div>
         )}
       </main>
-      <nav aria-label="Navegación principal" className="ry-bottom-nav ry-bottom-nav--four">
-        <button onClick={onBack} type="button"><Icon name="home" /><span>Inicio</span></button>
-        <button onClick={onBack} type="button"><Icon name="reports" /><span>Mis reportes</span></button>
-        <button onClick={onBack} type="button"><Icon name="plus" /><span>Crear reporte</span></button>
+      <nav aria-label="Navegación principal" className="ry-bottom-nav">
+        <button onClick={onOpenHome} type="button"><Icon name="home" /><span>Inicio</span></button>
+        <button onClick={onOpenReports} type="button"><Icon name="reports" /><span>Reportes</span></button>
         <button aria-current="page" className="is-active" onClick={onBack} type="button"><Icon name="user" /><span>Mi cuenta</span></button>
       </nav>
     </div>

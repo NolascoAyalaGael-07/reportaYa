@@ -4,16 +4,18 @@ import { HomeScreen } from './screens/HomeScreen'
 import { LoginScreen } from './screens/LoginScreen'
 import { NewReportScreen, type NewReportInput } from './screens/NewReportScreen'
 import { RegisterScreen } from './screens/RegisterScreen'
+import { ReportDetailScreen } from './screens/ReportDetailScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import { UsersScreen } from './screens/UsersScreen'
 import type { Report, Student } from './screens/reportTypes'
 
-type Screen = 'login' | 'register' | 'home' | 'reports' | 'settings' | 'create-report' | 'users'
+type Screen = 'login' | 'register' | 'home' | 'reports' | 'settings' | 'create-report' | 'users' | 'report-detail'
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login')
   const [student, setStudent] = useState<Student | null>(null)
   const [reports, setReports] = useState<Report[]>([])
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [startupError, setStartupError] = useState('')
 
@@ -104,10 +106,31 @@ function App() {
   }
 
   if (screen === 'users' && student.role === 'administrador') {
-    return <UsersScreen currentUser={student} onBack={() => setScreen('settings')} />
+    return (
+      <UsersScreen
+        currentUser={student}
+        onBack={() => setScreen('settings')}
+        onOpenHome={() => setScreen('home')}
+        onOpenReports={() => setScreen('reports')}
+      />
+    )
   }
 
-  if (screen === 'create-report') {
+  if (screen === 'report-detail' && selectedReportId) {
+    return (
+      <ReportDetailScreen
+        onBack={() => setScreen('reports')}
+        onOpenHome={() => setScreen('home')}
+        onOpenReports={() => setScreen('reports')}
+        onOpenSettings={() => setScreen('settings')}
+        onUpdated={(updated) => setReports((current) => current.map((report) => report.id === updated.id ? updated : report))}
+        reportId={selectedReportId}
+        student={student}
+      />
+    )
+  }
+
+  if (screen === 'create-report' && student.role === 'alumno') {
     return (
       <NewReportScreen
         onCancel={() => setScreen('home')}
@@ -116,6 +139,7 @@ function App() {
         onOpenReports={() => setScreen('reports')}
         onOpenSettings={() => setScreen('settings')}
         onSubmitReport={handleSubmitReport}
+        student={student}
       />
     )
   }
@@ -124,6 +148,10 @@ function App() {
     <HomeScreen
       onCreateReport={() => setScreen('create-report')}
       onOpenHome={() => setScreen('home')}
+      onOpenReport={(reportId) => {
+        setSelectedReportId(reportId)
+        setScreen('report-detail')
+      }}
       onOpenReports={() => setScreen('reports')}
       onOpenSettings={() => setScreen('settings')}
       reports={reports}

@@ -149,10 +149,10 @@ export function SettingsScreen({
           </section>
         </div>
       </main>
-      <nav aria-label="Navegación principal" className="ry-bottom-nav ry-bottom-nav--four">
+      <nav aria-label="Navegación principal" className={`ry-bottom-nav${student.role === 'alumno' ? ' ry-bottom-nav--four' : ''}`}>
         <button onClick={onOpenHome} type="button"><Icon name="home" /><span>Inicio</span></button>
-        <button onClick={onOpenReports} type="button"><Icon name="reports" /><span>Mis reportes</span></button>
-        <button onClick={onCreateReport} type="button"><Icon name="plus" /><span>Crear reporte</span></button>
+        <button onClick={onOpenReports} type="button"><Icon name="reports" /><span>{student.role === 'alumno' ? 'Mis reportes' : 'Reportes'}</span></button>
+        {student.role === 'alumno' && <button onClick={onCreateReport} type="button"><Icon name="plus" /><span>Crear reporte</span></button>}
         <button aria-current="page" className="is-active" type="button"><Icon name="user" /><span>Mi cuenta</span></button>
       </nav>
     </div>

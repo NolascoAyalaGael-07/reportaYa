@@ -12,12 +12,12 @@ type ApiResponse<T> = {
   message?: string
 }
 
-async function request<T>(path: string, body?: unknown): Promise<T> {
+async function request<T>(path: string, body?: unknown, method?: 'GET' | 'POST' | 'PATCH'): Promise<T> {
   let response: Response
 
   try {
     response = await fetch(path, {
-      method: body === undefined ? 'GET' : 'POST',
+      method: method ?? (body === undefined ? 'GET' : 'POST'),
       credentials: 'same-origin',
       headers: body === undefined || body instanceof FormData
         ? undefined
@@ -84,6 +84,40 @@ export async function logout(): Promise<void> {
 export async function listReports(): Promise<Report[]> {
   const result = await request<{ reports: Report[] }>('/api/reports')
   return result.reports
+}
+
+export type StatusHistoryEntry = {
+  id: string
+  fromStatus: Report['status'] | null
+  toStatus: Report['status']
+  changedBy: string
+  changedAt: string
+  comment: string | null
+}
+
+export async function getReport(reportId: string): Promise<Report> {
+  const result = await request<{ report: Report }>(`/api/reports/${encodeURIComponent(reportId)}`)
+  return result.report
+}
+
+export async function getReportHistory(reportId: string): Promise<StatusHistoryEntry[]> {
+  const result = await request<{ history: StatusHistoryEntry[] }>(
+    `/api/reports/${encodeURIComponent(reportId)}/history`,
+  )
+  return result.history
+}
+
+export async function changeReportStatus(
+  reportId: string,
+  status: Report['status'],
+  comment: string,
+): Promise<Report> {
+  const result = await request<{ report: Report }>(
+    `/api/reports/${encodeURIComponent(reportId)}/status`,
+    { status, comment },
+    'PATCH',
+  )
+  return result.report
 }
 
 export async function createReport(
