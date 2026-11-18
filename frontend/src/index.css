@@ -553,6 +553,234 @@ button:disabled {
   }
 }
 
+:root[data-theme='dark'] {
+  --ry-ink: #e5eef8;
+  --ry-muted: #a4b4c7;
+  --ry-line: #34485e;
+  --ry-surface: #16263a;
+  --ry-background: #0e1a29;
+  --ry-card-border: #2b4057;
+  --ry-blue-soft: #1b3551;
+}
+
+:root[data-theme='dark'] body,
+:root[data-theme='dark'] .ry-app-shell,
+:root[data-theme='dark'] .ry-report-shell {
+  color: var(--ry-ink);
+  background: var(--ry-background);
+}
+
+:root[data-theme='dark'] .ry-auth-layout {
+  background: radial-gradient(ellipse at 50% 0, #172b42 0, transparent 55%);
+}
+
+:root[data-theme='dark'] .ry-app-header,
+:root[data-theme='dark'] .ry-auth-header,
+:root[data-theme='dark'] .ry-bottom-nav {
+  border-color: #293d53;
+  background: #101e2def;
+}
+
+:root[data-theme='dark'] .ry-auth-card,
+:root[data-theme='dark'] .ry-report-card,
+:root[data-theme='dark'] .ry-stat-card,
+:root[data-theme='dark'] .ry-setting-row,
+:root[data-theme='dark'] .ry-setting-wrap,
+:root[data-theme='dark'] .ry-profile-card,
+:root[data-theme='dark'] .ry-user-card,
+:root[data-theme='dark'] .ry-detail-card,
+:root[data-theme='dark'] .ry-field-card,
+:root[data-theme='dark'] .ry-account-form,
+:root[data-theme='dark'] .ry-privacy-card,
+:root[data-theme='dark'] .ry-theme-options,
+:root[data-theme='dark'] .ry-theme-option,
+:root[data-theme='dark'] .ry-notification-card,
+:root[data-theme='dark'] .ry-help-faq details,
+:root[data-theme='dark'] .ry-support-form,
+:root[data-theme='dark'] .ry-support-card,
+:root[data-theme='dark'] .ry-search-field,
+:root[data-theme='dark'] .ry-role-select-label select,
+:root[data-theme='dark'] .ry-empty-state {
+  color: var(--ry-ink);
+  border-color: var(--ry-card-border);
+  background: var(--ry-surface);
+}
+
+:root[data-theme='dark'] .ry-profile-card,
+:root[data-theme='dark'] .ry-notification-card.is-unread,
+:root[data-theme='dark'] .ry-photo-preview {
+  background: var(--ry-surface);
+}
+
+:root[data-theme='dark'] .ry-role-explainer article,
+:root[data-theme='dark'] .ry-users-count,
+:root[data-theme='dark'] .ry-account-form input[readonly],
+:root[data-theme='dark'] .ry-account-form > input,
+:root[data-theme='dark'] .ry-password-section > input,
+:root[data-theme='dark'] .ry-support-form > input,
+:root[data-theme='dark'] .ry-support-form > textarea,
+:root[data-theme='dark'] .ry-status-update-form select,
+:root[data-theme='dark'] .ry-status-update-form textarea,
+:root[data-theme='dark'] .ry-field-card > select,
+:root[data-theme='dark'] .ry-field-card > input,
+:root[data-theme='dark'] .ry-description-card textarea,
+:root[data-theme='dark'] .ry-input-wrap,
+:root[data-theme='dark'] .ry-status-filters button,
+:root[data-theme='dark'] .ry-status-select {
+  color: var(--ry-ink);
+  border-color: var(--ry-line);
+  background: #102034;
+}
+
+:root[data-theme='dark'] .ry-input-wrap input,
+:root[data-theme='dark'] .ry-search-field input,
+:root[data-theme='dark'] .ry-status-select select {
+  color: var(--ry-ink);
+}
+
+:root[data-theme='dark'] .ry-back-button,
+:root[data-theme='dark'] .ry-button--outline,
+:root[data-theme='dark'] .ry-photo-remove {
+  color: #b8d5f7;
+  border-color: var(--ry-line);
+  background: #1a2b40;
+}
+
+:root[data-theme='dark'] .ry-button--outline:hover,
+:root[data-theme='dark'] .ry-photo-remove:hover {
+  background: #223852;
+}
+
+:root[data-theme='dark'] .ry-role-pill,
+:root[data-theme='dark'] .ry-setting-icon,
+:root[data-theme='dark'] .ry-report-icon,
+:root[data-theme='dark'] .ry-create-plus {
+  color: #a9ccfa;
+  background: #223852;
+}
+
+:root[data-theme='dark'] .ry-setting-icon--logout {
+  color: #ff9aa5;
+  background: #442b3a;
+}
+
+:root[data-theme='dark'] .ry-setting-detail,
+:root[data-theme='dark'] .ry-report-heading p,
+:root[data-theme='dark'] .ry-report-meta,
+:root[data-theme='dark'] .ry-report-reporter,
+:root[data-theme='dark'] .ry-profile-copy > small,
+:root[data-theme='dark'] .ry-report-title-group small,
+:root[data-theme='dark'] .ry-setting-copy small,
+:root[data-theme='dark'] .ry-create-heading p,
+:root[data-theme='dark'] .ry-photo-placeholder span,
+:root[data-theme='dark'] .ry-field-title small,
+:root[data-theme='dark'] .ry-upload-inner small,
+:root[data-theme='dark'] .ry-status-help,
+:root[data-theme='dark'] .ry-detail-description,
+:root[data-theme='dark'] .ry-detail-location small,
+:root[data-theme='dark'] .ry-detail-reporter small,
+:root[data-theme='dark'] .ry-timeline li > p,
+:root[data-theme='dark'] .ry-auth-footer,
+:root[data-theme='dark'] .ry-overline {
+  color: var(--ry-muted);
+}
+
+:root[data-theme='dark'] .ry-greeting h1,
+:root[data-theme='dark'] .ry-section-title-row h1,
+:root[data-theme='dark'] .ry-section-title-row h2,
+:root[data-theme='dark'] .ry-settings-group h2,
+:root[data-theme='dark'] .ry-setting-copy strong,
+:root[data-theme='dark'] .ry-report-title-group strong,
+:root[data-theme='dark'] .ry-detail-heading h1,
+:root[data-theme='dark'] .ry-detail-card h2,
+:root[data-theme='dark'] .ry-account-main h1,
+:root[data-theme='dark'] .ry-users-main h1,
+:root[data-theme='dark'] .ry-profile-copy strong,
+:root[data-theme='dark'] .ry-user-copy strong {
+  color: var(--ry-ink);
+}
+
+:root[data-theme='dark'] .ry-theme-option.is-selected,
+:root[data-theme='dark'] .ry-photo-change,
+:root[data-theme='dark'] .ry-upload-inner,
+:root[data-theme='dark'] .ry-role-banner {
+  border-color: #395a7c;
+  background: #1b3551;
+}
+
+:root[data-theme='dark'] .ry-photo-placeholder strong,
+:root[data-theme='dark'] .ry-field-title > span,
+:root[data-theme='dark'] .ry-field-card > select,
+:root[data-theme='dark'] .ry-field-card > input,
+:root[data-theme='dark'] .ry-description-card textarea,
+:root[data-theme='dark'] .ry-status-update-form select,
+:root[data-theme='dark'] .ry-status-update-form textarea,
+:root[data-theme='dark'] .ry-role-select-label select {
+  color: var(--ry-ink);
+}
+
+:root[data-theme='dark'] .ry-status-filters button:not(.is-selected) {
+  color: var(--ry-muted);
+}
+
+:root[data-theme='dark'] .ry-status-filters button.is-selected {
+  color: #fff;
+  border-color: #1765b8;
+  background: #1765b8;
+}
+
+:root[data-theme='dark'] .ry-status--pendiente {
+  color: #f3c27b;
+  background: #473724;
+}
+
+:root[data-theme='dark'] .ry-status--en-atención {
+  color: #9dcaff;
+  background: #1c3d60;
+}
+
+:root[data-theme='dark'] .ry-status--solucionado {
+  color: #91d6bf;
+  background: #1c403b;
+}
+
+:root[data-theme='dark'] .ry-bottom-nav button.is-active {
+  color: #a9ccfa;
+  background: #1b3551;
+}
+
+:root[data-theme='dark'] .ry-success-message {
+  color: #9bd8bf;
+  border-color: #315a4c;
+  background: #18382f;
+}
+
+:root[data-theme='dark'] .ry-error-panel {
+  color: #ffb1b8;
+  border-color: #633b46;
+  background: #38232d;
+}
+
+:root[data-theme='dark'] .ry-divider::before,
+:root[data-theme='dark'] .ry-divider::after,
+:root[data-theme='dark'] .ry-detail-location,
+:root[data-theme='dark'] .ry-detail-reporter {
+  border-color: var(--ry-line);
+}
+
+:root[data-theme='dark'] .ry-timeline li:not(:last-child)::before {
+  background: var(--ry-line);
+}
+
+:root[data-theme='dark'] .ry-timeline-marker {
+  border-color: var(--ry-surface);
+}
+
+:root[data-theme='dark'] input::placeholder,
+:root[data-theme='dark'] textarea::placeholder {
+  color: #8196ae;
+}
+
 .ry-account-main {
   width: min(100% - 40px, 860px);
   margin: 0 auto;
