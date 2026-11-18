@@ -21,6 +21,27 @@ export class TestRepository implements Repository {
     return student
   }
 
+  async listUsers() {
+    return this.users.map(({ passwordHash: _passwordHash, ...student }) => student)
+  }
+
+  async updateUserRole(actorId: string, targetId: string, role: UserRecord['role']) {
+    const target = this.users.find((user) => user.id === targetId)
+    if (!target) return { error: 'not_found' as const }
+    if (actorId === targetId && target.role !== role) return { error: 'self' as const }
+    if (
+      target.role === 'administrador'
+      && role !== 'administrador'
+      && this.users.filter((user) => user.role === 'administrador').length <= 1
+    ) {
+      return { error: 'last_admin' as const }
+    }
+
+    target.role = role
+    const { passwordHash: _passwordHash, ...student } = target
+    return { student }
+  }
+
   async createReport(userId: string, input: ReportInput) {
     const report = {
       ...input,

@@ -83,6 +83,13 @@ function parseReport(value: unknown): { data?: ReportInput; error?: string } {
   }
 }
 
+function parseRole(value: unknown): UserRole | null {
+  if (!isRecord(value)) return null
+  return value.role === 'alumno' || value.role === 'mantenimiento' || value.role === 'administrador'
+    ? value.role
+    : null
+}
+
 function isDuplicateEntry(error: unknown): boolean {
   return isRecord(error) && error.code === 'ER_DUP_ENTRY'
 }
@@ -191,6 +198,31 @@ export function createApp(repository: Repository) {
 
   app.get('/api/auth/me', requireSession, (_request, response) => {
     return response.json({ student: response.locals.student })
+  })
+
+  app.get('/api/users', requireSession, requireRole('administrador'), async (_request, response) => {
+    return response.json({ users: await repository.listUsers() })
+  })
+
+  app.patch('/api/users/:id/role', requireSession, requireRole('administrador'), async (request, response) => {
+    const actor = response.locals.student
+    const targetId = request.params.id
+    const role = parseRole(request.body)
+    if (!actor) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    if (typeof targetId !== 'string' || !/^[1-9]\d*$/.test(targetId) || !role) {
+      return response.status(400).json({ message: 'Selecciona un usuario y un rol válidos.' })
+    }
+
+    const result = await repository.updateUserRole(actor.id, targetId, role)
+    if ('error' in result) {
+      const messages = {
+        not_found: 'No se encontró esa cuenta.',
+        last_admin: 'No puedes quitar el rol del último administrador.',
+        self: 'No puedes cambiar tu propio rol.',
+      }
+      return response.status(result.error === 'not_found' ? 404 : 409).json({ message: messages[result.error] })
+    }
+    return response.json({ student: result.student })
   })
 
   app.get('/api/reports', requireSession, async (_request, response) => {

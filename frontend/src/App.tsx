@@ -5,9 +5,10 @@ import { LoginScreen } from './screens/LoginScreen'
 import { NewReportScreen } from './screens/NewReportScreen'
 import { RegisterScreen } from './screens/RegisterScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
+import { UsersScreen } from './screens/UsersScreen'
 import type { Report, Student } from './screens/reportTypes'
 
-type Screen = 'login' | 'register' | 'home' | 'reports' | 'settings' | 'create-report'
+type Screen = 'login' | 'register' | 'home' | 'reports' | 'settings' | 'create-report' | 'users'
 
 function App() {
   const [screen, setScreen] = useState<Screen>('login')
@@ -93,12 +94,17 @@ function App() {
     return (
       <SettingsScreen
         onCreateReport={() => setScreen('create-report')}
+        onManageUsers={() => setScreen('users')}
         onLogout={handleLogout}
         onOpenHome={() => setScreen('home')}
         onOpenReports={() => setScreen('reports')}
         student={student}
       />
     )
+  }
+
+  if (screen === 'users' && student.role === 'administrador') {
+    return <UsersScreen currentUser={student} onBack={() => setScreen('settings')} />
   }
 
   if (screen === 'create-report') {

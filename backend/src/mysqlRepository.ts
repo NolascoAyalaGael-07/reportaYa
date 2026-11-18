@@ -81,6 +81,49 @@ export function createMysqlRepository(pool: Pool): Repository {
       }
     },
 
+    async listUsers() {
+      const [rows] = await pool.execute<UserRow[]>(
+        'SELECT id, name, control_number AS controlNumber, email, password_hash AS passwordHash, role FROM users ORDER BY name, id',
+      )
+      return rows.map(toStudent)
+    },
+
+    async updateUserRole(actorId, targetId, role) {
+      const connection = await pool.getConnection()
+      try {
+        await connection.beginTransaction()
+        const [admins] = await connection.execute<RowDataPacket[]>(
+          "SELECT id FROM users WHERE role = 'administrador' FOR UPDATE",
+        )
+        const [rows] = await connection.execute<UserRow[]>(
+          'SELECT id, name, control_number AS controlNumber, email, password_hash AS passwordHash, role FROM users WHERE id = ? FOR UPDATE',
+          [targetId],
+        )
+        const target = rows[0]
+        if (!target) {
+          await connection.rollback()
+          return { error: 'not_found' as const }
+        }
+        if (actorId === targetId && target.role !== role) {
+          await connection.rollback()
+          return { error: 'self' as const }
+        }
+        if (target.role === 'administrador' && role !== 'administrador' && admins.length <= 1) {
+          await connection.rollback()
+          return { error: 'last_admin' as const }
+        }
+
+        await connection.execute('UPDATE users SET role = ? WHERE id = ?', [role, targetId])
+        await connection.commit()
+        return { student: { ...toStudent(target), role } }
+      } catch (error) {
+        await connection.rollback()
+        throw error
+      } finally {
+        connection.release()
+      }
+    },
+
     async createReport(userId: string, input: ReportInput) {
       const [result] = await pool.execute<ResultSetHeader>(
         'INSERT INTO reports (user_id, title, category, location, description, status) VALUES (?, ?, ?, ?, ?, ?)',

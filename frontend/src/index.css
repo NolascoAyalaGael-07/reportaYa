@@ -1063,6 +1063,115 @@ button:disabled {
   line-height: 1.5;
 }
 
+.ry-users-main {
+  width: min(100% - 36px, 820px);
+  margin: 0 auto;
+  padding: 22px 0 34px;
+}
+
+.ry-users-main h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.5px;
+}
+
+.ry-users-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 18px;
+  padding: 6px 0;
+  color: var(--ry-blue);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.ry-users-intro {
+  margin: 5px 0 15px;
+  color: var(--ry-muted);
+  font-size: 12px;
+}
+
+.ry-role-explainer {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border: 1px solid #dfe9f4;
+  border-radius: 12px;
+  background: #f7fbff;
+}
+
+.ry-role-explainer p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  font-size: 11px;
+}
+
+.ry-role-explainer span {
+  color: var(--ry-muted);
+  font-size: 10px;
+}
+
+.ry-user-list {
+  display: grid;
+  gap: 9px;
+}
+
+.ry-user-card {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #e0e9f4;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.ry-avatar--user {
+  width: 38px;
+  height: 38px;
+}
+
+.ry-user-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 3px;
+}
+
+.ry-user-copy strong {
+  font-size: 12px;
+}
+
+.ry-user-copy small {
+  overflow: hidden;
+  color: var(--ry-muted);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ry-user-copy .ry-user-role {
+  color: var(--ry-blue);
+  font-weight: 700;
+}
+
+.ry-role-select-label select {
+  max-width: 140px;
+  padding: 8px 7px;
+  color: #355575;
+  border: 1px solid var(--ry-line);
+  border-radius: 9px;
+  background: #fff;
+  font-size: 10px;
+}
+
 .ry-profile-detail {
   padding: 9px 13px;
 }
@@ -1401,6 +1510,14 @@ button:disabled {
 
   .ry-create-main {
     width: calc(100% - 28px);
+  }
+
+  .ry-user-card {
+    flex-wrap: wrap;
+  }
+
+  .ry-role-select-label {
+    margin-left: 48px;
   }
 }
 

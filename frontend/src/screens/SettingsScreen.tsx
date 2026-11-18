@@ -5,6 +5,7 @@ import type { Student } from './reportTypes'
 type SettingsScreenProps = {
   student: Student
   onLogout: () => Promise<void>
+  onManageUsers: () => void
   onOpenHome: () => void
   onOpenReports: () => void
   onCreateReport: () => void
@@ -68,6 +69,7 @@ const settingGroups: { heading: string; items: SettingItem[] }[] = [
 export function SettingsScreen({
   student,
   onLogout,
+  onManageUsers,
   onOpenHome,
   onOpenReports,
   onCreateReport,
@@ -104,11 +106,21 @@ export function SettingsScreen({
         </div>
         <button className="ry-profile-card" onClick={() => setExpandedItem(expandedItem === 'profile' ? null : 'profile')} type="button" aria-expanded={expandedItem === 'profile'}>
           <span className="ry-avatar ry-avatar--large">{student.name.slice(0, 1).toUpperCase()}{student.name.split(' ')[1]?.slice(0, 1).toUpperCase() ?? ''}</span>
-          <span className="ry-profile-copy"><strong>{student.name}</strong><small>{student.email}</small><span className="ry-role-pill"><Icon name="user" size={12} /> Estudiante</span></span>
+          <span className="ry-profile-copy"><strong>{student.name}</strong><small>{student.email}</small><span className="ry-role-pill"><Icon name="user" size={12} /> {student.role === 'administrador' ? 'Administrador' : student.role === 'mantenimiento' ? 'Mantenimiento' : 'Estudiante'}</span></span>
           <Icon name="chevron" size={19} />
         </button>
         {expandedItem === 'profile' && <p className="ry-setting-detail ry-profile-detail">Número de control: {student.controlNumber || 'No proporcionado en esta demostración'}</p>}
         <div className="ry-settings-groups">
+          {student.role === 'administrador' && (
+            <section className="ry-settings-group">
+              <h2>Administración</h2>
+              <button className="ry-setting-row" onClick={onManageUsers} type="button">
+                <span className="ry-setting-icon"><Icon name="user" size={19} /></span>
+                <span className="ry-setting-copy"><strong>Gestionar usuarios</strong><small>Asigna roles de alumno, mantenimiento o administración.</small></span>
+                <Icon name="chevron" size={18} />
+              </button>
+            </section>
+          )}
           {settingGroups.map((group) => (
             <section className="ry-settings-group" key={group.heading}>
               <h2>{group.heading}</h2>

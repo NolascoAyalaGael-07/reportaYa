@@ -15,4 +15,5 @@ export type Student = {
   name: string
   email: string
   controlNumber: string
+  role: 'alumno' | 'mantenimiento' | 'administrador'
 }

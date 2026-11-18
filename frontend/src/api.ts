@@ -62,6 +62,19 @@ export async function currentStudent(): Promise<Student> {
   return result.student
 }
 
+export async function listUsers(): Promise<Student[]> {
+  const result = await request<{ users: Student[] }>('/api/users')
+  return result.users
+}
+
+export async function updateUserRole(
+  userId: string,
+  role: Student['role'],
+): Promise<Student> {
+  const result = await request<{ student: Student }>(`/api/users/${encodeURIComponent(userId)}/role`, { role })
+  return result.student
+}
+
 export async function logout(): Promise<void> {
   await request<undefined>('/api/auth/logout', {})
 }

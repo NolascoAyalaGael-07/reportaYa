@@ -30,6 +30,10 @@ export type ReportRecord = ReportInput & {
 export interface Repository {
   findUserByEmail(email: string): Promise<UserRecord | null>
   createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student>
+  listUsers(): Promise<Student[]>
+  updateUserRole(actorId: string, targetId: string, role: UserRole): Promise<
+    { student: Student } | { error: 'not_found' | 'last_admin' | 'self' }
+  >
   createReport(userId: string, input: ReportInput): Promise<ReportRecord>
   listReports(userId: string): Promise<ReportRecord[]>
 }
