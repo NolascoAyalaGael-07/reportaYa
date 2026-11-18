@@ -82,7 +82,7 @@ export function SettingsScreen({
               <h2>Administración</h2>
               <button className="ry-setting-row" onClick={onManageUsers} type="button">
                 <span className="ry-setting-icon"><Icon name="user" size={19} /></span>
-                <span className="ry-setting-copy"><strong>Gestionar usuarios</strong><small>Asigna roles de alumno, mantenimiento o administración.</small></span>
+                <span className="ry-setting-copy"><strong>Gestionar usuarios</strong><small>Consulta cuentas y agrega personal de mantenimiento.</small></span>
                 <Icon name="chevron" size={18} />
               </button>
             </section>

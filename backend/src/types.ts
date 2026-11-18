@@ -73,9 +73,6 @@ export interface Repository {
   updateAccount(id: string, name: string, passwordHash: string | null): Promise<Student | null>
   createUser(input: Omit<UserRecord, 'id' | 'role'>, role?: 'alumno' | 'mantenimiento'): Promise<Student>
   listUsers(): Promise<Student[]>
-  updateUserRole(actorId: string, targetId: string, role: UserRole): Promise<
-    { student: Student } | { error: 'not_found' | 'last_admin' | 'self' }
-  >
   createReport(userId: string, input: ReportInput, photoPath: string | null): Promise<ReportRecord>
   getReportPhotoPath(userId: string, role: UserRole, reportId: string): Promise<string | null>
   getReport(userId: string, role: UserRole, reportId: string): Promise<ReportRecord | null>

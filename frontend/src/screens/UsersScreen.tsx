@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { createMaintenanceUser, errorMessage, listUsers, updateUserRole } from '../api'
+import { createMaintenanceUser, errorMessage, listUsers } from '../api'
 import { AppHeader } from '../components/AppHeader'
 import { Icon } from '../components/Brand'
 import type { Student } from './reportTypes'
@@ -20,11 +20,9 @@ const roleLabels: Record<Student['role'], string> = {
 
 export function UsersScreen({ currentUser, onBack, onOpenHome, onOpenReports, onOpenNotifications }: UsersScreenProps) {
   const [users, setUsers] = useState<Student[]>([])
-  const [draftRoles, setDraftRoles] = useState<Record<string, Student['role']>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
-  const [savingUser, setSavingUser] = useState<string | null>(null)
   const [creatingUser, setCreatingUser] = useState(false)
   const [query, setQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState<'todos' | Student['role']>('todos')
@@ -42,23 +40,6 @@ export function UsersScreen({ currentUser, onBack, onOpenHome, onOpenReports, on
       active = false
     }
   }, [])
-
-  async function handleRoleChange(user: Student, role: Student['role']) {
-    if (role === user.role) return
-    setSavingUser(user.id)
-    setError('')
-    setSuccess('')
-    try {
-      const updated = await updateUserRole(user.id, role)
-      setUsers((current) => current.map((item) => item.id === updated.id ? updated : item))
-      setDraftRoles((current) => ({ ...current, [updated.id]: updated.role }))
-      setSuccess(`Se actualizó el rol de ${updated.name}.`)
-    } catch (reason) {
-      setError(errorMessage(reason))
-    } finally {
-      setSavingUser(null)
-    }
-  }
 
   async function handleCreateMaintenanceUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -95,7 +76,7 @@ export function UsersScreen({ currentUser, onBack, onOpenHome, onOpenReports, on
       <main className="ry-users-main">
         <button className="ry-users-back" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Configuración</button>
         <div className="ry-users-heading">
-          <div><p className="ry-overline">Solo administración</p><h1>Gestionar usuarios</h1><p className="ry-users-intro">Agrega al personal de mantenimiento y asigna permisos según cada responsabilidad.</p></div>
+          <div><p className="ry-overline">Solo administración</p><h1>Gestionar usuarios</h1><p className="ry-users-intro">Consulta las cuentas y agrega personal de mantenimiento.</p></div>
           <span className="ry-users-count">{users.length} cuentas</span>
         </div>
         <section aria-labelledby="create-maintenance-title" className="ry-create-user-section">
@@ -144,27 +125,6 @@ export function UsersScreen({ currentUser, onBack, onOpenHome, onOpenReports, on
                   <small>{user.email} · {user.controlNumber}</small>
                   <small className="ry-user-role">{roleLabels[user.role]}</small>
                 </span>
-                <label className="ry-role-select-label">
-                  <span className="ry-visually-hidden">{`Rol de ${user.name}`}</span>
-                  <select
-                    disabled={savingUser !== null || user.id === currentUser.id}
-                    onChange={(event) => {
-                      const role = event.currentTarget.value as Student['role']
-                      setDraftRoles((current) => ({ ...current, [user.id]: role }))
-                    }}
-                    value={draftRoles[user.id] ?? user.role}
-                  >
-                    {Object.entries(roleLabels).map(([role, label]) => <option key={role} value={role}>{label}</option>)}
-                  </select>
-                </label>
-                <button
-                  className="ry-button ry-button--outline ry-user-save"
-                  disabled={savingUser !== null || user.id === currentUser.id || (draftRoles[user.id] ?? user.role) === user.role}
-                  onClick={() => void handleRoleChange(user, draftRoles[user.id] ?? user.role)}
-                  type="button"
-                >
-                  {savingUser === user.id ? 'Guardando…' : 'Guardar rol'}
-                </button>
               </article>
             ))}
             {filteredUsers.length === 0 && <p className="ry-empty-state">No se encontraron cuentas con esos filtros.</p>}

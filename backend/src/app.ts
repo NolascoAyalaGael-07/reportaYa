@@ -132,13 +132,6 @@ function parseReport(value: unknown): { data?: ReportInput; error?: string } {
   }
 }
 
-function parseRole(value: unknown): UserRole | null {
-  if (!isRecord(value)) return null
-  return value.role === 'alumno' || value.role === 'mantenimiento' || value.role === 'administrador'
-    ? value.role
-    : null
-}
-
 function parseStatus(value: unknown): ReportStatus | null {
   if (!isRecord(value) || typeof value.status !== 'string') return null
   return reportStatuses.has(value.status as ReportStatus) ? value.status as ReportStatus : null
@@ -379,25 +372,10 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
     }
   })
 
-  app.patch('/api/users/:id/role', requireSession, requireRole('administrador'), async (request, response) => {
-    const actor = response.locals.student
-    const targetId = request.params.id
-    const role = parseRole(request.body)
-    if (!actor) return response.status(401).json({ message: 'Inicia sesión para continuar.' })
-    if (typeof targetId !== 'string' || !/^[1-9]\d*$/.test(targetId) || !role) {
-      return response.status(400).json({ message: 'Selecciona un usuario y un rol válidos.' })
-    }
-
-    const result = await repository.updateUserRole(actor.id, targetId, role)
-    if ('error' in result) {
-      const messages = {
-        not_found: 'No se encontró esa cuenta.',
-        last_admin: 'No puedes quitar el rol del último administrador.',
-        self: 'No puedes cambiar tu propio rol.',
-      }
-      return response.status(result.error === 'not_found' ? 404 : 409).json({ message: messages[result.error] })
-    }
-    return response.json({ student: result.student })
+  app.patch('/api/users/:id/role', requireSession, requireRole('administrador'), (_request, response) => {
+    return response.status(409).json({
+      message: 'Los roles no se pueden cambiar. Para agregar personal de mantenimiento, crea una cuenta nueva.',
+    })
   })
 
   app.get('/api/notifications', requireSession, async (_request, response) => {

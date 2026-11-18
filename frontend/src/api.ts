@@ -88,18 +88,6 @@ export async function createMaintenanceUser(input: {
   return result.student
 }
 
-export async function updateUserRole(
-  userId: string,
-  role: Student['role'],
-): Promise<Student> {
-  const result = await request<{ student: Student }>(
-    `/api/users/${encodeURIComponent(userId)}/role`,
-    { role },
-    'PATCH',
-  )
-  return result.student
-}
-
 export async function logout(): Promise<void> {
   await request<undefined>('/api/auth/logout', {})
 }

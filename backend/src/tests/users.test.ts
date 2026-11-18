@@ -67,7 +67,7 @@ test('solo administradores pueden consultar usuarios y sus datos no exponen hash
   assert.equal('passwordHash' in users[0], false)
 })
 
-test('el administrador cambia el rol y nadie puede cambiar su propio rol', async () => {
+test('los roles no se pueden cambiar desde la aplicación', async () => {
   const forbidden = await fetch(`${baseUrl}/api/users/${studentId}/role`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json', Cookie: studentCookie },
@@ -80,26 +80,8 @@ test('el administrador cambia el rol y nadie puede cambiar su propio rol', async
     headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
     body: JSON.stringify({ role: 'mantenimiento' }),
   })
-  assert.equal(changed.status, 200)
-  assert.equal((await changed.json()).student.role, 'mantenimiento')
-
-  const promoted = await fetch(`${baseUrl}/api/users/${studentId}/role`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
-    body: JSON.stringify({ role: 'administrador' }),
-  })
-  assert.equal(promoted.status, 200)
-  const refreshedSession = await fetch(`${baseUrl}/api/users`, { headers: { Cookie: studentCookie } })
-  assert.equal(refreshedSession.status, 200)
-
-  const demoted = await fetch(`${baseUrl}/api/users/${studentId}/role`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
-    body: JSON.stringify({ role: 'mantenimiento' }),
-  })
-  assert.equal(demoted.status, 200)
-  const revokedSession = await fetch(`${baseUrl}/api/users`, { headers: { Cookie: studentCookie } })
-  assert.equal(revokedSession.status, 403)
+  assert.equal(changed.status, 409)
+  assert.equal(repository.users.find((user) => user.id === studentId)?.role, 'alumno')
 
   const selfDemotion = await fetch(`${baseUrl}/api/users/${adminId}/role`, {
     method: 'PATCH',
@@ -107,6 +89,7 @@ test('el administrador cambia el rol y nadie puede cambiar su propio rol', async
     body: JSON.stringify({ role: 'alumno' }),
   })
   assert.equal(selfDemotion.status, 409)
+  assert.equal(repository.users.find((user) => user.id === adminId)?.role, 'administrador')
 })
 
 test('solo administración puede crear cuentas de mantenimiento con credenciales válidas', async () => {
@@ -130,6 +113,14 @@ test('solo administración puede crear cuentas de mantenimiento con credenciales
   assert.equal(response.student.email, 'mantenimiento@ejemplo.com')
   assert.equal('passwordHash' in response.student, false)
   assert.equal(created.headers.get('set-cookie'), null)
+
+  const roleChange = await fetch(`${baseUrl}/api/users/${response.student.id}/role`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Cookie: adminCookie },
+    body: JSON.stringify({ role: 'alumno' }),
+  })
+  assert.equal(roleChange.status, 409)
+  assert.equal(repository.users.find((user) => user.id === response.student.id)?.role, 'mantenimiento')
 
   const duplicate = await postJson('/api/users', input, adminCookie)
   assert.equal(duplicate.status, 409)

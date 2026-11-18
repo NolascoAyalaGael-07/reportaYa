@@ -531,16 +531,6 @@ button:disabled {
     align-items: center;
   }
 
-  .ry-role-select-label,
-  .ry-user-save {
-    grid-column: 2;
-    justify-self: start;
-    margin-left: 0;
-  }
-
-  .ry-role-select-label select {
-    width: min(100%, 220px);
-  }
 }
 
 @media (max-width: 480px) {
@@ -599,7 +589,6 @@ button:disabled {
 :root[data-theme='dark'] .ry-support-form,
 :root[data-theme='dark'] .ry-support-card,
 :root[data-theme='dark'] .ry-search-field,
-:root[data-theme='dark'] .ry-role-select-label select,
 :root[data-theme='dark'] .ry-empty-state {
   color: var(--ry-ink);
   border-color: var(--ry-card-border);
@@ -715,10 +704,6 @@ button:disabled {
 :root[data-theme='dark'] .ry-description-card textarea,
 :root[data-theme='dark'] .ry-status-update-form select,
 :root[data-theme='dark'] .ry-status-update-form textarea,
-:root[data-theme='dark'] .ry-role-select-label select {
-  color: var(--ry-ink);
-}
-
 :root[data-theme='dark'] .ry-status-filters button:not(.is-selected) {
   color: var(--ry-muted);
 }
@@ -1404,11 +1389,7 @@ button:disabled {
 :root[data-theme='dark'] .ry-support-form,
 :root[data-theme='dark'] .ry-support-card,
 :root[data-theme='dark'] .ry-search-field,
-:root[data-theme='dark'] .ry-role-select-label select {
-  color: var(--ry-ink);
-  border-color: var(--ry-card-border);
-  background-color: var(--ry-surface);
-}
+
 
 :root[data-theme='dark'] .ry-role-explainer article,
 :root[data-theme='dark'] .ry-users-count,
@@ -2420,7 +2401,7 @@ button:disabled {
 .ry-user-card {
   display: grid;
   min-width: 0;
-  grid-template-columns: auto minmax(0, 1fr) minmax(130px, 180px) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 14px;
   padding: 15px 16px;
@@ -2464,23 +2445,6 @@ button:disabled {
 .ry-user-copy .ry-user-role {
   color: var(--ry-blue);
   font-weight: 700;
-}
-
-.ry-role-select-label select {
-  width: 100%;
-  min-height: 40px;
-  padding: 8px 10px;
-  color: #355575;
-  border: 1px solid var(--ry-line);
-  border-radius: 9px;
-  background: #fff;
-  font-size: 11px;
-}
-
-.ry-user-save {
-  min-height: 40px;
-  padding: 8px 11px;
-  white-space: nowrap;
 }
 
 .ry-visually-hidden {
@@ -2833,13 +2797,6 @@ button:disabled {
     width: calc(100% - 28px);
   }
 
-  .ry-user-card {
-    flex-wrap: wrap;
-  }
-
-  .ry-role-select-label {
-    margin-left: 48px;
-  }
 }
 
 @media (max-width: 430px) {
@@ -2866,16 +2823,6 @@ button:disabled {
     align-items: center;
   }
 
-  .ry-role-select-label,
-  .ry-user-save {
-    grid-column: 2;
-    justify-self: start;
-    margin-left: 0;
-  }
-
-  .ry-role-select-label select {
-    width: min(100%, 220px);
-  }
 }
 
 @media (max-width: 480px) {
