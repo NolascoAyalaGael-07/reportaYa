@@ -166,16 +166,39 @@ test('mantiene detalles privados del reporte y permite a mantenimiento actualiza
   assert.equal(history[1].toStatus, 'En atención')
   assert.equal(history[1].changedBy, 'Mario Mantenimiento')
   assert.equal(history[1].comment, 'Trabajo iniciado.')
+
+  const resolved = await fetch(`${baseUrl}/api/reports/${report.id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Cookie: maintenanceCookie },
+    body: JSON.stringify({ status: 'Solucionado', comment: 'Trabajo terminado.' }),
+  })
+  assert.equal(resolved.status, 200)
+
+  const maintenanceReopen = await fetch(`${baseUrl}/api/reports/${report.id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Cookie: maintenanceCookie },
+    body: JSON.stringify({ status: 'En atención' }),
+  })
+  assert.equal(maintenanceReopen.status, 409)
+  assert.match((await maintenanceReopen.json()).message, /ya fue solucionado/)
+  assert.equal(repository.reports.find((candidate) => candidate.id === report.id)?.status, 'Solucionado')
+
+  const studentUpdateResolved = await fetch(`${baseUrl}/api/reports/${report.id}/status`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Cookie: cookie },
+    body: JSON.stringify({ status: 'Pendiente' }),
+  })
+  assert.equal(studentUpdateResolved.status, 403)
 })
 
-test('filtra los reportes por estado y búsqueda para mantenimiento', async () => {
-  const filtered = await fetch(`${baseUrl}/api/reports?status=En%20atenci%C3%B3n&q=204`, {
+test('filtra los reportes solucionados por estado y búsqueda para mantenimiento', async () => {
+  const filtered = await fetch(`${baseUrl}/api/reports?status=Solucionado&q=204`, {
     headers: { Cookie: maintenanceCookie },
   })
   assert.equal(filtered.status, 200)
   const reports = (await filtered.json()).reports
   assert.equal(reports.length, 1)
-  assert.equal(reports[0].status, 'En atención')
+  assert.equal(reports[0].status, 'Solucionado')
 })
 
 test('almacena imágenes validadas, las sirve solo a usuarios autorizados y limpia archivos inválidos', async () => {

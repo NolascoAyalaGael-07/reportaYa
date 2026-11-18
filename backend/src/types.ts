@@ -77,8 +77,8 @@ export interface Repository {
   getReportPhotoPath(userId: string, role: UserRole, reportId: string): Promise<string | null>
   getReport(userId: string, role: UserRole, reportId: string): Promise<ReportRecord | null>
   listReports(userId: string, role: UserRole, filters: ReportFilters): Promise<ReportRecord[]>
-  updateReportStatus(actorId: string, reportId: string, status: ReportStatus, comment: string | null): Promise<
-    { report: ReportRecord } | { error: 'not_found' | 'unchanged' }
+  updateReportStatus(actorId: string, actorRole: UserRole, reportId: string, status: ReportStatus, comment: string | null): Promise<
+    { report: ReportRecord } | { error: 'not_found' | 'unchanged' | 'already_solved' }
   >
   listStatusHistory(userId: string, role: UserRole, reportId: string): Promise<StatusHistoryEntry[]>
   listNotifications(userId: string): Promise<UserNotification[]>

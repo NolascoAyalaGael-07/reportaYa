@@ -247,7 +247,7 @@ export function createMysqlRepository(pool: Pool): Repository {
       return rows.map(toReport)
     },
 
-    async updateReportStatus(actorId, reportId, status, comment) {
+    async updateReportStatus(actorId, actorRole, reportId, status, comment) {
       const connection = await pool.getConnection()
       try {
         await connection.beginTransaction()
@@ -263,6 +263,10 @@ export function createMysqlRepository(pool: Pool): Repository {
         if (row.status === status) {
           await connection.rollback()
           return { error: 'unchanged' as const }
+        }
+        if (actorRole === 'mantenimiento' && row.status === 'Solucionado') {
+          await connection.rollback()
+          return { error: 'already_solved' as const }
         }
 
         await connection.execute('UPDATE reports SET status = ? WHERE id = ?', [status, reportId])

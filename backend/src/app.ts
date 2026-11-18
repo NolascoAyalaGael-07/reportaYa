@@ -569,11 +569,13 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
     }
     if (comment.length > 300) return response.status(400).json({ message: 'El comentario no puede superar 300 caracteres.' })
 
-    const result = await repository.updateReportStatus(student.id, reportId, status, comment || null)
+    const result = await repository.updateReportStatus(student.id, student.role, reportId, status, comment || null)
     if ('error' in result) {
       const message = result.error === 'not_found'
         ? 'No se encontró ese reporte.'
-        : 'El reporte ya tiene ese estado.'
+        : result.error === 'already_solved'
+          ? 'El reporte ya fue solucionado y mantenimiento no puede modificarlo.'
+          : 'El reporte ya tiene ese estado.'
       return response.status(result.error === 'not_found' ? 404 : 409).json({ message })
     }
     return response.json({ report: result.report })

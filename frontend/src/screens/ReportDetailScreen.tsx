@@ -123,7 +123,12 @@ export function ReportDetailScreen({
                 )}
               </div>
               <aside className="ry-detail-secondary">
-                {student.role !== 'alumno' && (
+                {report.status === 'Solucionado' && student.role !== 'administrador' ? (
+                  <section className="ry-detail-card ry-readonly-notice">
+                    <h2>Reporte solucionado</h2>
+                    <p>Este reporte está en modo de solo lectura y ya no se puede modificar.</p>
+                  </section>
+                ) : student.role !== 'alumno' && (
                   <form className="ry-detail-card ry-status-update-form" onSubmit={handleStatusSubmit}>
                     <h2>Actualizar estado</h2>
                     <label htmlFor="detail-status">Nuevo estado</label>

@@ -108,11 +108,12 @@ export class TestRepository implements Repository {
     ))
   }
 
-  async updateReportStatus(actorId: string, reportId: string, status: ReportStatus, comment: string | null) {
+  async updateReportStatus(actorId: string, actorRole: UserRole, reportId: string, status: ReportStatus, comment: string | null) {
     const report = this.reports.find((candidate) => candidate.id === reportId)
     const actor = this.users.find((candidate) => candidate.id === actorId)
     if (!report || !actor) return { error: 'not_found' as const }
     if (report.status === status) return { error: 'unchanged' as const }
+    if (actorRole === 'mantenimiento' && report.status === 'Solucionado') return { error: 'already_solved' as const }
 
     const previousStatus = report.status
     report.status = status
