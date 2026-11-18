@@ -6,7 +6,10 @@ SET @initial_admin_email = 'REEMPLAZA_CON_CORREO_REGISTRADO';
 
 UPDATE users
 SET role = 'administrador'
-WHERE email = LOWER(TRIM(@initial_admin_email))
+WHERE email = (
+  CONVERT(LOWER(TRIM(@initial_admin_email)) USING utf8mb4)
+  COLLATE utf8mb4_unicode_ci
+)
   AND role = 'alumno';
 
 SELECT ROW_COUNT() AS accounts_promoted;
