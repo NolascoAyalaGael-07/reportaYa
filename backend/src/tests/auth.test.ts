@@ -86,4 +86,12 @@ test('el inicio de sesión acepta la contraseña correcta y el endpoint de sesi�
   const currentUser = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: cookie } })
   assert.equal(currentUser.status, 200)
   assert.equal((await currentUser.json()).student.email, 'andrea@ejemplo.com')
+
+  const logout = await fetch(`${baseUrl}/api/auth/logout`, {
+    method: 'POST',
+    headers: { Cookie: cookie },
+  })
+  assert.equal(logout.status, 204)
+  const invalidatedSession = await fetch(`${baseUrl}/api/auth/me`, { headers: { Cookie: cookie } })
+  assert.equal(invalidatedSession.status, 401)
 })

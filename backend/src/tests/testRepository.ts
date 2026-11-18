@@ -3,6 +3,7 @@ import type { Repository, ReportFilters, ReportInput, ReportRecord, ReportStatus
 export class TestRepository implements Repository {
   readonly users: UserRecord[] = []
   readonly reports: ReportRecord[] = []
+  readonly sessions = new Map<string, { userId: string; expiresAt: number }>()
   readonly history = new Map<string, StatusHistoryEntry[]>()
   private readonly reportOwners = new Map<string, string>()
   private readonly reportPhotos = new Map<string, string>()
@@ -15,6 +16,23 @@ export class TestRepository implements Repository {
 
   async findUserByEmail(email: string) {
     return this.users.find((user) => user.email === email) ?? null
+  }
+
+  async createSession(tokenHash: string, userId: string, expiresAt: number) {
+    this.sessions.set(tokenHash, { userId, expiresAt })
+  }
+
+  async findSession(tokenHash: string) {
+    const session = this.sessions.get(tokenHash)
+    if (!session || session.expiresAt <= Date.now()) {
+      this.sessions.delete(tokenHash)
+      return null
+    }
+    return { userId: session.userId }
+  }
+
+  async deleteSession(tokenHash: string) {
+    this.sessions.delete(tokenHash)
   }
 
   async createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student> {

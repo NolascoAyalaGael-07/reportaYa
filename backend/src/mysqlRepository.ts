@@ -111,6 +111,27 @@ export function createMysqlRepository(pool: Pool): Repository {
       return row ? { ...toStudent(row), passwordHash: row.passwordHash } : null
     },
 
+    async createSession(tokenHash, userId, expiresAt) {
+      await pool.execute('DELETE FROM auth_sessions WHERE expires_at <= CURRENT_TIMESTAMP')
+      await pool.execute(
+        'INSERT INTO auth_sessions (token_hash, user_id, expires_at) VALUES (?, ?, ?)',
+        [tokenHash, userId, new Date(expiresAt)],
+      )
+    },
+
+    async findSession(tokenHash) {
+      const [rows] = await pool.execute<RowDataPacket[]>(
+        'SELECT user_id AS userId FROM auth_sessions WHERE token_hash = ? AND expires_at > CURRENT_TIMESTAMP LIMIT 1',
+        [tokenHash],
+      )
+      const row = rows[0] as { userId: string } | undefined
+      return row ? { userId: String(row.userId) } : null
+    },
+
+    async deleteSession(tokenHash) {
+      await pool.execute('DELETE FROM auth_sessions WHERE token_hash = ?', [tokenHash])
+    },
+
     async createUser(input: Omit<UserRecord, 'id' | 'role'>) {
       const [result] = await pool.execute<ResultSetHeader>(
         "INSERT INTO users (name, control_number, email, password_hash, role) VALUES (?, ?, ?, ?, 'alumno')",

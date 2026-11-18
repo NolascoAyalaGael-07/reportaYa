@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from 'node:crypto'
+import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import { mkdir, readFile, rename, unlink } from 'node:fs/promises'
 import { basename, resolve } from 'node:path'
 import express, { type NextFunction, type Request, type Response } from 'express'
@@ -10,11 +10,6 @@ const sessionCookie = 'reportaya_session'
 const sessionLifetimeMs = 8 * 60 * 60 * 1000
 const allowedCategories = new Set(['Electricidad', 'Plomería', 'Limpieza', 'Mobiliario', 'Otro'])
 const reportStatuses = new Set<ReportStatus>(['Pendiente', 'En atención', 'Solucionado'])
-type Session = {
-  studentId: string
-  expiresAt: number
-}
-
 type Credentials = {
   name: string
   controlNumber: string
@@ -143,6 +138,10 @@ function getSessionToken(request: Request): string | null {
   return cookie?.slice(sessionCookie.length + 1) || null
 }
 
+function hashSessionToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex')
+}
+
 function setSessionCookie(response: Response, token: string): void {
   const secure = process.env.NODE_ENV === 'production' ? '; Secure' : ''
   response.setHeader(
@@ -173,7 +172,6 @@ function requireRole(...roles: UserRole[]) {
 
 export function createApp(repository: Repository, options: AppOptions = {}) {
   const app = express()
-  const sessions = new Map<string, Session>()
   const uploadDirectory = resolve(options.uploadDirectory ?? resolve(process.cwd(), 'uploads'))
   const upload = multer({
     storage: multer.diskStorage({
@@ -212,7 +210,7 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
         passwordHash: await hashPassword(data.password),
       })
       const token = randomBytes(32).toString('base64url')
-      sessions.set(token, { studentId: student.id, expiresAt: Date.now() + sessionLifetimeMs })
+      await repository.createSession(hashSessionToken(token), student.id, Date.now() + sessionLifetimeMs)
       setSessionCookie(response, token)
       return response.status(201).json({ student })
     } catch (error) {
@@ -233,30 +231,35 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
     }
 
     const token = randomBytes(32).toString('base64url')
-    sessions.set(token, { studentId: user.id, expiresAt: Date.now() + sessionLifetimeMs })
+    await repository.createSession(hashSessionToken(token), user.id, Date.now() + sessionLifetimeMs)
     setSessionCookie(response, token)
     return response.json({ student: publicStudent(user) })
   })
 
-  app.post('/api/auth/logout', (request, response) => {
+  app.post('/api/auth/logout', async (request, response) => {
     const token = getSessionToken(request)
-    if (token) sessions.delete(token)
+    if (token) await repository.deleteSession(hashSessionToken(token))
     clearSessionCookie(response)
     return response.status(204).end()
   })
 
   const requireSession = async (request: Request, response: Response, next: NextFunction) => {
     const token = getSessionToken(request)
-    const session = token ? sessions.get(token) : undefined
-    if (!session || session.expiresAt <= Date.now()) {
-      if (token) sessions.delete(token)
+    if (!token) {
       clearSessionCookie(response)
       return response.status(401).json({ message: 'Inicia sesión para continuar.' })
     }
 
-    const user = await repository.findUserById(session.studentId)
+    const tokenHash = hashSessionToken(token)
+    const session = await repository.findSession(tokenHash)
+    if (!session) {
+      clearSessionCookie(response)
+      return response.status(401).json({ message: 'Inicia sesión para continuar.' })
+    }
+
+    const user = await repository.findUserById(session.userId)
     if (!user) {
-      if (token) sessions.delete(token)
+      await repository.deleteSession(tokenHash)
       clearSessionCookie(response)
       return response.status(401).json({ message: 'Inicia sesión para continuar.' })
     }

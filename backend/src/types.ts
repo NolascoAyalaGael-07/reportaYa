@@ -48,6 +48,9 @@ export type StatusHistoryEntry = {
 export interface Repository {
   findUserById(id: string): Promise<UserRecord | null>
   findUserByEmail(email: string): Promise<UserRecord | null>
+  createSession(tokenHash: string, userId: string, expiresAt: number): Promise<void>
+  findSession(tokenHash: string): Promise<{ userId: string } | null>
+  deleteSession(tokenHash: string): Promise<void>
   createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student>
   listUsers(): Promise<Student[]>
   updateUserRole(actorId: string, targetId: string, role: UserRole): Promise<
