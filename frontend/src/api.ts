@@ -73,7 +73,11 @@ export async function updateUserRole(
   userId: string,
   role: Student['role'],
 ): Promise<Student> {
-  const result = await request<{ student: Student }>(`/api/users/${encodeURIComponent(userId)}/role`, { role })
+  const result = await request<{ student: Student }>(
+    `/api/users/${encodeURIComponent(userId)}/role`,
+    { role },
+    'PATCH',
+  )
   return result.student
 }
 
