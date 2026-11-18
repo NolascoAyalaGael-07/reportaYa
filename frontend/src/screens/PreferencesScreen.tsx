@@ -1,4 +1,5 @@
-import { Brand, Icon } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon } from '../components/Brand'
 import type { Student } from './reportTypes'
 
 export type Theme = 'light' | 'dark'
@@ -9,6 +10,7 @@ type PreferencesScreenProps = {
   onThemeChange: (theme: Theme) => void
   onBack: () => void
   onOpenHome: () => void
+  onOpenNotifications: () => void
   onOpenReports: () => void
 }
 
@@ -18,11 +20,12 @@ export function PreferencesScreen({
   onThemeChange,
   onBack,
   onOpenHome,
+  onOpenNotifications,
   onOpenReports,
 }: PreferencesScreenProps) {
   return (
     <div className="ry-app-shell">
-      <header className="ry-app-header"><div className="ry-app-header-inner"><Brand /><span className="ry-avatar ry-avatar--small">{student.name.slice(0, 1).toUpperCase()}</span></div></header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
       <main className="ry-account-main">
         <button className="ry-users-back" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Configuración</button>
         <p className="ry-overline">Personaliza ReportaYa</p>

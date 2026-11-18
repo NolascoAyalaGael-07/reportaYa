@@ -32,6 +32,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(true)
   const [startupError, setStartupError] = useState('')
   const [theme, setTheme] = useState<Theme>(getSavedTheme)
+  const openNotifications = () => setScreen('notifications')
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -128,7 +129,7 @@ function App() {
         onLogout={handleLogout}
         onOpenAccount={() => setScreen('account')}
         onOpenPrivacy={() => setScreen('privacy')}
-        onOpenNotifications={() => setScreen('notifications')}
+        onOpenNotifications={openNotifications}
         onOpenPreferences={() => setScreen('preferences')}
         onOpenHelp={() => setScreen('help')}
         onOpenHome={() => setScreen('home')}
@@ -143,6 +144,7 @@ function App() {
       <AccountSettingsScreen
         onBack={() => setScreen('settings')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReports={() => setScreen('reports')}
         onSave={handleProfileUpdate}
         student={student}
@@ -155,6 +157,7 @@ function App() {
       <PrivacyScreen
         onBack={() => setScreen('settings')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReports={() => setScreen('reports')}
         student={student}
       />
@@ -166,6 +169,7 @@ function App() {
       <NotificationsScreen
         onBack={() => setScreen('settings')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReport={(reportId) => {
           setSelectedReportId(reportId)
           setScreen('report-detail')
@@ -181,6 +185,7 @@ function App() {
       <PreferencesScreen
         onBack={() => setScreen('settings')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReports={() => setScreen('reports')}
         onThemeChange={setTheme}
         student={student}
@@ -194,6 +199,7 @@ function App() {
       <HelpScreen
         onBack={() => setScreen('settings')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReports={() => setScreen('reports')}
         student={student}
       />
@@ -206,6 +212,7 @@ function App() {
         currentUser={student}
         onBack={() => setScreen('settings')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReports={() => setScreen('reports')}
       />
     )
@@ -216,6 +223,7 @@ function App() {
       <ReportDetailScreen
         onBack={() => setScreen('reports')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReports={() => setScreen('reports')}
         onOpenSettings={() => setScreen('settings')}
         onUpdated={(updated) => setReports((current) => current.map((report) => report.id === updated.id ? updated : report))}
@@ -231,6 +239,7 @@ function App() {
         onCancel={() => setScreen('home')}
         onCreateReport={() => setScreen('create-report')}
         onOpenHome={() => setScreen('home')}
+        onOpenNotifications={openNotifications}
         onOpenReports={() => setScreen('reports')}
         onOpenSettings={() => setScreen('settings')}
         onSubmitReport={handleSubmitReport}
@@ -243,6 +252,7 @@ function App() {
     <HomeScreen
       onCreateReport={() => setScreen('create-report')}
       onOpenHome={() => setScreen('home')}
+      onOpenNotifications={openNotifications}
       onOpenReport={(reportId) => {
         setSelectedReportId(reportId)
         setScreen('report-detail')

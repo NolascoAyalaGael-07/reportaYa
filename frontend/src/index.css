@@ -781,6 +781,73 @@ button:disabled {
   color: #8196ae;
 }
 
+.ry-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.ry-header-notifications {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: #607995;
+  border: 1px solid var(--ry-line);
+  border-radius: 12px;
+  background: var(--ry-surface);
+  cursor: pointer;
+  place-items: center;
+}
+
+.ry-header-notifications:hover {
+  color: var(--ry-blue);
+  background: var(--ry-blue-soft);
+}
+
+.ry-create-user-section {
+  display: grid;
+  gap: 7px;
+  margin: 15px 0;
+  padding: 15px;
+  border: 1px solid var(--ry-card-border);
+  border-radius: 14px;
+  background: var(--ry-surface);
+}
+
+.ry-create-user-section h2 {
+  margin: 0;
+  color: var(--ry-ink);
+  font-size: 15px;
+}
+
+.ry-create-user-section > p {
+  margin: 0;
+  color: var(--ry-muted);
+  font-size: 11px;
+}
+
+.ry-create-user-section .ry-account-form {
+  margin-top: 5px;
+  padding: 14px;
+  box-shadow: none;
+}
+
+:root[data-theme='dark'] .ry-header-notifications {
+  color: #b8d5f7;
+  border-color: var(--ry-card-border);
+  background: #1a2b40;
+}
+
+:root[data-theme='dark'] .ry-header-notifications:hover {
+  color: #d3e6ff;
+  background: #223852;
+}
+
+:root[data-theme='dark'] .ry-form-message {
+  color: #ffb1b8;
+}
+
 .ry-account-main {
   width: min(100% - 40px, 860px);
   margin: 0 auto;

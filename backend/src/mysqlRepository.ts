@@ -149,17 +149,17 @@ export function createMysqlRepository(pool: Pool): Repository {
       })
     },
 
-    async createUser(input: Omit<UserRecord, 'id' | 'role'>) {
+    async createUser(input: Omit<UserRecord, 'id' | 'role'>, role: 'alumno' | 'mantenimiento' = 'alumno') {
       const [result] = await pool.execute<ResultSetHeader>(
-        "INSERT INTO users (name, control_number, email, password_hash, role) VALUES (?, ?, ?, ?, 'alumno')",
-        [input.name, input.controlNumber, input.email, input.passwordHash],
+        'INSERT INTO users (name, control_number, email, password_hash, role) VALUES (?, ?, ?, ?, ?)',
+        [input.name, input.controlNumber, input.email, input.passwordHash, role],
       )
       return {
         id: String(result.insertId),
         name: input.name,
         controlNumber: input.controlNumber,
         email: input.email,
-        role: 'alumno',
+        role,
       }
     },
 

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from 'react'
-import { Brand, Icon } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon } from '../components/Brand'
 import type { Report, Student } from './reportTypes'
 
 export type NewReportInput = Pick<Report, 'category' | 'location' | 'description'> & { photo: File | null }
@@ -9,6 +10,7 @@ type NewReportScreenProps = {
   onCancel: () => void
   onSubmitReport: (report: NewReportInput) => Promise<void>
   onOpenHome: () => void
+  onOpenNotifications: () => void
   onOpenReports: () => void
   onOpenSettings: () => void
   onCreateReport: () => void
@@ -20,6 +22,7 @@ export function NewReportScreen({
   onCancel,
   onSubmitReport,
   onOpenHome,
+  onOpenNotifications,
   onOpenReports,
   onOpenSettings,
   onCreateReport,
@@ -84,12 +87,7 @@ export function NewReportScreen({
 
   return (
     <div className="ry-app-shell ry-report-shell">
-      <header className="ry-app-header">
-        <div className="ry-app-header-inner">
-          <Brand />
-          <span aria-label="Sesión activa" className="ry-avatar ry-avatar--small">{student.name.slice(0, 1).toUpperCase()}{student.name.split(' ')[1]?.slice(0, 1).toUpperCase() ?? ''}</span>
-        </div>
-      </header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
       <main className="ry-create-main">
         <div className="ry-create-heading">
           <button aria-label="Volver" className="ry-create-back" onClick={onCancel} type="button"><Icon name="arrow-left" /></button>

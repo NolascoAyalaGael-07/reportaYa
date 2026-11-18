@@ -71,7 +71,7 @@ export interface Repository {
   findSession(tokenHash: string): Promise<{ userId: string } | null>
   deleteSession(tokenHash: string): Promise<void>
   updateAccount(id: string, name: string, passwordHash: string | null): Promise<Student | null>
-  createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student>
+  createUser(input: Omit<UserRecord, 'id' | 'role'>, role?: 'alumno' | 'mantenimiento'): Promise<Student>
   listUsers(): Promise<Student[]>
   updateUserRole(actorId: string, targetId: string, role: UserRole): Promise<
     { student: Student } | { error: 'not_found' | 'last_admin' | 'self' }

@@ -78,6 +78,16 @@ export async function listUsers(): Promise<Student[]> {
   return result.users
 }
 
+export async function createMaintenanceUser(input: {
+  name: string
+  controlNumber: string
+  email: string
+  password: string
+}): Promise<Student> {
+  const result = await request<{ student: Student }>('/api/users', input)
+  return result.student
+}
+
 export async function updateUserRole(
   userId: string,
   role: Student['role'],

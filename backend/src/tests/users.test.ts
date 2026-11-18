@@ -108,3 +108,32 @@ test('el administrador cambia el rol y nadie puede cambiar su propio rol', async
   })
   assert.equal(selfDemotion.status, 409)
 })
+
+test('solo administración puede crear cuentas de mantenimiento con credenciales válidas', async () => {
+  const input = {
+    name: 'Personal de mantenimiento',
+    controlNumber: 'M100',
+    email: 'mantenimiento@ejemplo.com',
+    password: 'clave-inicial-123',
+    role: 'administrador',
+  }
+  const anonymous = await postJson('/api/users', input)
+  assert.equal(anonymous.status, 401)
+
+  const forbidden = await postJson('/api/users', input, studentCookie)
+  assert.equal(forbidden.status, 403)
+
+  const created = await postJson('/api/users', input, adminCookie)
+  assert.equal(created.status, 201)
+  const response = await created.json()
+  assert.equal(response.student.role, 'mantenimiento')
+  assert.equal(response.student.email, 'mantenimiento@ejemplo.com')
+  assert.equal('passwordHash' in response.student, false)
+  assert.equal(created.headers.get('set-cookie'), null)
+
+  const duplicate = await postJson('/api/users', input, adminCookie)
+  assert.equal(duplicate.status, 409)
+
+  const invalid = await postJson('/api/users', { ...input, password: 'short' }, adminCookie)
+  assert.equal(invalid.status, 400)
+})

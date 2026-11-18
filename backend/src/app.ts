@@ -354,6 +354,31 @@ export function createApp(repository: Repository, options: AppOptions = {}) {
     return response.json({ users: await repository.listUsers() })
   })
 
+  app.post('/api/users', requireSession, requireRole('administrador'), async (request, response) => {
+    const parsed = parseCredentials(request.body)
+    if (!parsed.data) return response.status(400).json({ message: parsed.error })
+    const { data } = parsed
+
+    if (await repository.findUserByEmail(data.email)) {
+      return response.status(409).json({ message: 'Ya existe una cuenta con ese correo.' })
+    }
+
+    try {
+      const student = await repository.createUser({
+        name: data.name,
+        controlNumber: data.controlNumber,
+        email: data.email,
+        passwordHash: await hashPassword(data.password),
+      }, 'mantenimiento')
+      return response.status(201).json({ student })
+    } catch (error) {
+      if (isDuplicateEntry(error)) {
+        return response.status(409).json({ message: 'El correo o número de control ya está registrado.' })
+      }
+      throw error
+    }
+  })
+
   app.patch('/api/users/:id/role', requireSession, requireRole('administrador'), async (request, response) => {
     const actor = response.locals.student
     const targetId = request.params.id

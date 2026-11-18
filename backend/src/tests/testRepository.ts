@@ -48,12 +48,12 @@ export class TestRepository implements Repository {
     return student
   }
 
-  async createUser(input: Omit<UserRecord, 'id' | 'role'>): Promise<Student> {
+  async createUser(input: Omit<UserRecord, 'id' | 'role'>, role: 'alumno' | 'mantenimiento' = 'alumno'): Promise<Student> {
     if (this.users.some((user) => user.email === input.email || user.controlNumber === input.controlNumber)) {
       throw Object.assign(new Error('Duplicate entry'), { code: 'ER_DUP_ENTRY' })
     }
 
-    const user = { ...input, id: String(this.nextUserId++), role: 'alumno' as const }
+    const user = { ...input, id: String(this.nextUserId++), role }
     this.users.push(user)
     const { passwordHash: _passwordHash, ...student } = user
     return student

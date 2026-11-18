@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { changeReportStatus, errorMessage, getReport, getReportHistory, type StatusHistoryEntry } from '../api'
-import { Brand, Icon } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon } from '../components/Brand'
 import type { Report, ReportStatus, Student } from './reportTypes'
 
 type ReportDetailScreenProps = {
@@ -8,6 +9,7 @@ type ReportDetailScreenProps = {
   student: Student
   onBack: () => void
   onOpenHome: () => void
+  onOpenNotifications: () => void
   onOpenReports: () => void
   onOpenSettings: () => void
   onUpdated: (report: Report) => void
@@ -36,6 +38,7 @@ export function ReportDetailScreen({
   student,
   onBack,
   onOpenHome,
+  onOpenNotifications,
   onOpenReports,
   onOpenSettings,
   onUpdated,
@@ -90,12 +93,7 @@ export function ReportDetailScreen({
 
   return (
     <div className="ry-app-shell">
-      <header className="ry-app-header">
-        <div className="ry-app-header-inner">
-          <Brand />
-          <span aria-label="Sesión activa" className="ry-avatar ry-avatar--small">{student.name.slice(0, 1).toUpperCase()}{student.name.split(' ')[1]?.slice(0, 1).toUpperCase() ?? ''}</span>
-        </div>
-      </header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
       <main className="ry-report-detail-main">
         <button className="ry-users-back" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Regresar a reportes</button>
         {loading ? (

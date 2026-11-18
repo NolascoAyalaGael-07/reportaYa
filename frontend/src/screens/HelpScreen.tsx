@@ -1,12 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { createSupportRequest, errorMessage, listSupportRequests, updateSupportRequestStatus, type SupportRequest } from '../api'
-import { Brand, Icon } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon } from '../components/Brand'
 import type { Student } from './reportTypes'
 
 type HelpScreenProps = {
   student: Student
   onBack: () => void
   onOpenHome: () => void
+  onOpenNotifications: () => void
   onOpenReports: () => void
 }
 
@@ -15,7 +17,7 @@ function formatDate(value: string) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-export function HelpScreen({ student, onBack, onOpenHome, onOpenReports }: HelpScreenProps) {
+export function HelpScreen({ student, onBack, onOpenHome, onOpenNotifications, onOpenReports }: HelpScreenProps) {
   const [requests, setRequests] = useState<SupportRequest[]>([])
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
@@ -72,7 +74,7 @@ export function HelpScreen({ student, onBack, onOpenHome, onOpenReports }: HelpS
 
   return (
     <div className="ry-app-shell">
-      <header className="ry-app-header"><div className="ry-app-header-inner"><Brand /><span className="ry-avatar ry-avatar--small">{student.name.slice(0, 1).toUpperCase()}</span></div></header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
       <main className="ry-account-main">
         <button className="ry-users-back" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Configuración</button>
         <p className="ry-overline">Estamos para ayudarte</p>

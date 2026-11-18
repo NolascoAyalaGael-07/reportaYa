@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { errorMessage, listNotifications, markAllNotificationsRead, markNotificationRead, type UserNotification } from '../api'
-import { Brand, Icon } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon } from '../components/Brand'
 import type { Student } from './reportTypes'
 
 type NotificationsScreenProps = {
   student: Student
   onBack: () => void
   onOpenHome: () => void
+  onOpenNotifications: () => void
   onOpenReports: () => void
   onOpenReport: (reportId: string) => void
 }
@@ -16,7 +18,7 @@ function formatDate(value: string) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
-export function NotificationsScreen({ student, onBack, onOpenHome, onOpenReports, onOpenReport }: NotificationsScreenProps) {
+export function NotificationsScreen({ student, onBack, onOpenHome, onOpenNotifications, onOpenReports, onOpenReport }: NotificationsScreenProps) {
   const [notifications, setNotifications] = useState<UserNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -69,7 +71,7 @@ export function NotificationsScreen({ student, onBack, onOpenHome, onOpenReports
 
   return (
     <div className="ry-app-shell">
-      <header className="ry-app-header"><div className="ry-app-header-inner"><Brand /><span className="ry-avatar ry-avatar--small">{student.name.slice(0, 1).toUpperCase()}</span></div></header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} showNotifications={false} />
       <main className="ry-account-main">
         <div className="ry-account-page-heading">
           <div><button className="ry-users-back" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Configuración</button><p className="ry-overline">Seguimiento</p><h1>Notificaciones</h1></div>

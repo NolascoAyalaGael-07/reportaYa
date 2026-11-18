@@ -38,6 +38,7 @@ test('registro guarda un hash, inicia sesión y protege la sesión con cookie Ht
       controlNumber: '23210000',
       email: 'Andrea@ejemplo.com',
       password: 'clave-segura-123',
+      role: 'mantenimiento',
     }),
   })
 

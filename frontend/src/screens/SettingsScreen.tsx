@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Brand, Icon, type IconName } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon, type IconName } from '../components/Brand'
 import type { Student } from './reportTypes'
 
 type SettingsScreenProps = {
@@ -62,12 +63,7 @@ export function SettingsScreen({
 
   return (
     <div className="ry-app-shell">
-      <header className="ry-app-header">
-        <div className="ry-app-header-inner">
-          <Brand />
-          <span aria-label="Sesión activa" className="ry-avatar ry-avatar--small">{student.name.slice(0, 1).toUpperCase()}{student.name.split(' ')[1]?.slice(0, 1).toUpperCase() ?? ''}</span>
-        </div>
-      </header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
       <main className="ry-settings-main">
         <div className="ry-settings-intro">
           <p className="ry-overline">Tu espacio personal</p>

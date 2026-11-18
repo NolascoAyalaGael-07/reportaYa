@@ -1,21 +1,23 @@
-import { Brand, Icon } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon } from '../components/Brand'
 import type { Student } from './reportTypes'
 
 type PrivacyScreenProps = {
   student: Student
   onBack: () => void
   onOpenHome: () => void
+  onOpenNotifications: () => void
   onOpenReports: () => void
 }
 
-export function PrivacyScreen({ student, onBack, onOpenHome, onOpenReports }: PrivacyScreenProps) {
+export function PrivacyScreen({ student, onBack, onOpenHome, onOpenNotifications, onOpenReports }: PrivacyScreenProps) {
   const visibility = student.role === 'alumno'
     ? 'Tus reportes solo son visibles para ti y para el personal autorizado de mantenimiento y administración.'
     : 'Tu rol permite consultar reportes del plantel para apoyar su seguimiento. Solo administración puede gestionar roles.'
 
   return (
     <div className="ry-app-shell">
-      <header className="ry-app-header"><div className="ry-app-header-inner"><Brand /><span className="ry-avatar ry-avatar--small">{student.name.slice(0, 1).toUpperCase()}</span></div></header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
       <main className="ry-account-main">
         <button className="ry-users-back" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Configuración</button>
         <p className="ry-overline">Tus datos y reportes</p>

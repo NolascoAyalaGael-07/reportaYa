@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Brand, Icon } from '../components/Brand'
+import { AppHeader } from '../components/AppHeader'
+import { Icon } from '../components/Brand'
 import type { IconName } from '../components/Brand'
 import type { Report, ReportStatus, Student } from './reportTypes'
 
@@ -12,6 +13,7 @@ type HomeScreenProps = {
   onOpenReports: () => void
   onOpenHome: () => void
   onOpenReport: (reportId: string) => void
+  onOpenNotifications: () => void
 }
 
 const reportIcon: Record<string, IconName> = {
@@ -82,6 +84,7 @@ export function HomeScreen({
   onOpenReports,
   onOpenHome,
   onOpenReport,
+  onOpenNotifications,
 }: HomeScreenProps) {
   const [selectedStatus, setSelectedStatus] = useState<'Todos' | ReportStatus>('Todos')
   const [query, setQuery] = useState('')
@@ -98,12 +101,7 @@ export function HomeScreen({
 
   return (
     <div className="ry-app-shell">
-      <header className="ry-app-header">
-        <div className="ry-app-header-inner">
-          <Brand />
-          <button aria-label={`Abrir cuenta de ${student.name}`} className="ry-avatar ry-avatar--small" onClick={onOpenSettings} type="button">{student.name.slice(0, 1).toUpperCase()}{student.name.split(' ')[1]?.slice(0, 1).toUpperCase() ?? ''}</button>
-        </div>
-      </header>
+      <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
       <main className="ry-home-main">
         {showReports ? (
           <section aria-labelledby="reports-title">
