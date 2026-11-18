@@ -36,6 +36,7 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
+    document.documentElement.classList.toggle('dark', theme === 'dark')
     try {
       localStorage.setItem('reportaya-theme', theme)
     } catch {
@@ -110,7 +111,7 @@ function App() {
   }
 
   if (isLoading) {
-    return <main className="ry-loading-screen" role="status">Conectando con ReportaYa…</main>
+    return <main className="grid min-h-screen place-items-center bg-[var(--ry-background)] p-5 text-[13px] text-[var(--ry-muted)]" role="status">Conectando con ReportaYa…</main>
   }
 
   if (!student) {

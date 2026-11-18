@@ -55,10 +55,11 @@ const iconShapes: Record<IconName, ReactNode> = {
   user: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
 }
 
-export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
+export function Icon({ name, size = 20, className }: { name: IconName; size?: number; className?: string }) {
   return (
     <svg
       aria-hidden="true"
+      className={className}
       width={size}
       height={size}
       viewBox="0 0 24 24"
@@ -75,11 +76,14 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <span className={`ry-brand${compact ? ' ry-brand--compact' : ''}`}>
-      <span className="ry-brand-mark" aria-hidden="true"><Icon name="shield" size={27} /><span /></span>
-      <span className="ry-brand-copy">
-        <strong>ReportaYa</strong>
-        <small>Reporta fácil. Mejora rápido.</small>
+    <span className={`inline-flex items-center gap-[10px] text-[var(--ry-ink)]${compact ? ' gap-2' : ''}`}>
+      <span aria-hidden="true" className="relative grid h-10 w-9 shrink-0 place-items-center rounded-[50%_50%_55%_55%] bg-[var(--ry-blue)] text-white [clip-path:polygon(50%_0,94%_19%,88%_62%,50%_100%,12%_62%,6%_19%)]">
+        <Icon name="shield" size={27} />
+        <span className="absolute right-0 top-0 size-2 rounded-full border-2 border-white bg-[#ff9a45]" />
+      </span>
+      <span className="grid gap-px text-left">
+        <strong className="text-[19px] leading-[1.1] tracking-[-0.5px]">ReportaYa</strong>
+        <small className="text-[10px] leading-[1.4] text-[var(--ry-muted)]">Reporta fácil. Mejora rápido.</small>
       </span>
     </span>
   )

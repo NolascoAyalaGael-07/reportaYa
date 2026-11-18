@@ -1,7 +1,9 @@
 import { FormEvent, useEffect, useState } from 'react'
 import { changeReportStatus, errorMessage, getReport, getReportHistory, type StatusHistoryEntry } from '../api'
 import { AppHeader } from '../components/AppHeader'
+import { BottomNav } from '../components/BottomNav'
 import { Icon } from '../components/Brand'
+import { StatusBadge } from '../components/StatusBadge'
 import type { Report, ReportStatus, Student } from './reportTypes'
 
 type ReportDetailScreenProps = {
@@ -92,65 +94,65 @@ export function ReportDetailScreen({
   }
 
   return (
-    <div className="ry-app-shell">
+    <div className="min-h-screen bg-[var(--ry-background)] pb-[88px] text-[var(--ry-ink)]">
       <AppHeader name={student.name} onOpenNotifications={onOpenNotifications} />
-      <main className="ry-report-detail-main">
-        <button className="ry-users-back" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Regresar a reportes</button>
+      <main className="mx-auto w-[calc(100%-36px)] max-w-[920px] py-5">
+        <button className="mb-[18px] inline-flex items-center gap-[7px] border-0 bg-transparent py-1.5 text-xs font-bold text-[var(--ry-blue)]" onClick={onBack} type="button"><Icon name="arrow-left" size={18} /> Regresar a reportes</button>
         {loading ? (
-          <p className="ry-empty-state" role="status">Cargando detalle del reporte…</p>
+          <p className="rounded-xl border border-dashed border-[var(--ry-line)] bg-white p-[22px] text-center text-[13px] text-[var(--ry-muted)] dark:bg-[var(--ry-surface)]" role="status">Cargando detalle del reporte…</p>
         ) : error && !report ? (
-          <p className="ry-error-panel" role="alert">{error}</p>
+          <p className="rounded-xl border border-[#f1c7c7] bg-[#fff4f4] p-3 text-xs text-[#b42318] dark:border-[#613842] dark:bg-[#30202a] dark:text-[#ffaaaa]" role="alert">{error}</p>
         ) : report ? (
           <>
-            <header className="ry-detail-heading">
-              <p className="ry-overline">{report.category} · Reporte #{report.id}</p>
-              <h1>{report.title}</h1>
-              <div className="ry-detail-status-row"><StatusBadge status={report.status} /><span>{formatDate(report.date)}</span></div>
+            <header className="mb-[17px] mt-px">
+              <p className="mb-[6px] text-[11px] font-semibold text-[#7690ad]">{report.category} · Reporte #{report.id}</p>
+              <h1 className="m-0 text-2xl tracking-[-0.5px]">{report.title}</h1>
+              <div className="mt-[9px] flex items-center gap-[10px] text-[10px] text-[var(--ry-muted)]"><StatusBadge status={report.status} /><span>{formatDate(report.date)}</span></div>
             </header>
-            <div className="ry-detail-grid">
-              <div className="ry-detail-primary">
-                <section className="ry-detail-card">
-                  <h2>Descripción del problema</h2>
-                  <p className="ry-detail-description">{report.description}</p>
-                  <div className="ry-detail-location"><Icon name="pin" size={18} /><span><strong>Ubicación</strong><small>{report.location}</small></span></div>
-                  {student.role !== 'alumno' && <div className="ry-detail-reporter"><Icon name="user" size={18} /><span><strong>Reportado por</strong><small>{report.reporterName} · {report.reporterControlNumber}</small></span></div>}
+            <div className="grid gap-[13px] min-[760px]:grid-cols-[minmax(0,1.3fr)_minmax(260px,0.7fr)]">
+              <div className="grid content-start gap-[13px]">
+                <section className="min-w-0 rounded-[13px] border border-[#e0e9f4] bg-white p-[15px] dark:border-[var(--ry-card-border)] dark:bg-[var(--ry-surface)]">
+                  <h2 className="mb-[11px] mt-0 text-[13px]">Descripción del problema</h2>
+                  <p className="m-0 whitespace-pre-wrap text-xs leading-[1.65] text-[#506b89] dark:text-[var(--ry-muted)]">{report.description}</p>
+                  <div className="mt-[14px] flex items-center gap-[9px] border-t border-[#edf1f6] pt-3 text-[var(--ry-blue)] dark:border-[var(--ry-line)]"><Icon name="pin" size={18} /><span className="grid gap-[3px]"><strong className="text-[10px] text-[var(--ry-ink)]">Ubicación</strong><small className="text-[10px] text-[var(--ry-muted)]">{report.location}</small></span></div>
+                  {student.role !== 'alumno' && <div className="mt-[14px] flex items-center gap-[9px] border-t border-[#edf1f6] pt-3 text-[var(--ry-blue)] dark:border-[var(--ry-line)]"><Icon name="user" size={18} /><span className="grid gap-[3px]"><strong className="text-[10px] text-[var(--ry-ink)]">Reportado por</strong><small className="text-[10px] text-[var(--ry-muted)]">{report.reporterName} · {report.reporterControlNumber}</small></span></div>}
                 </section>
                 {report.photoUrl && (
-                  <section className="ry-detail-card ry-detail-photo-section">
-                    <h2>Fotografía del incidente</h2>
-                    <img alt={`Fotografía del reporte: ${report.title}`} className="ry-detail-photo" src={report.photoUrl} />
+                  <section className="min-w-0 rounded-[13px] border border-[#e0e9f4] bg-white p-[15px] dark:border-[var(--ry-card-border)] dark:bg-[var(--ry-surface)]">
+                    <h2 className="mb-[11px] mt-0 text-[13px]">Fotografía del incidente</h2>
+                    <img alt={`Fotografía del reporte: ${report.title}`} className="block max-h-[460px] w-full rounded-[10px] object-contain" src={report.photoUrl} />
                   </section>
                 )}
               </div>
-              <aside className="ry-detail-secondary">
+              <aside className="grid content-start gap-[13px]">
                 {report.status === 'Solucionado' && student.role !== 'administrador' ? (
-                  <section className="ry-detail-card ry-readonly-notice">
-                    <h2>Reporte solucionado</h2>
-                    <p>Este reporte está en modo de solo lectura y ya no se puede modificar.</p>
+                  <section className="rounded-[13px] border border-[#e0e9f4] bg-white p-[15px] dark:border-[var(--ry-card-border)] dark:bg-[var(--ry-surface)]">
+                    <h2 className="mb-[11px] mt-0 text-[13px]">Reporte solucionado</h2>
+                    <p className="m-0 text-xs leading-[1.55] text-[var(--ry-muted)]">Este reporte está en modo de solo lectura y ya no se puede modificar.</p>
                   </section>
                 ) : student.role !== 'alumno' && (
-                  <form className="ry-detail-card ry-status-update-form" onSubmit={handleStatusSubmit}>
-                    <h2>Actualizar estado</h2>
-                    <label htmlFor="detail-status">Nuevo estado</label>
-                    <select id="detail-status" onChange={(event) => setNextStatus(event.currentTarget.value as ReportStatus)} value={nextStatus}>
+                  <form className="grid gap-[9px] rounded-[13px] border border-[#e0e9f4] bg-white p-[15px] dark:border-[var(--ry-card-border)] dark:bg-[var(--ry-surface)]" onSubmit={handleStatusSubmit}>
+                    <h2 className="mb-[2px] mt-0 text-[13px]">Actualizar estado</h2>
+                    <label className="text-[10px] font-bold" htmlFor="detail-status">Nuevo estado</label>
+                    <select className="min-h-[38px] rounded-[9px] border border-[var(--ry-line)] bg-[var(--ry-surface)] px-[10px] text-[11px] text-[var(--ry-ink)]" id="detail-status" onChange={(event) => setNextStatus(event.currentTarget.value as ReportStatus)} value={nextStatus}>
                       {statuses.filter((status) => status !== report.status).map((status) => <option key={status} value={status}>{status}</option>)}
                     </select>
-                    <label htmlFor="detail-comment">Nota del personal (opcional)</label>
-                    <textarea id="detail-comment" maxLength={300} onChange={(event) => setComment(event.currentTarget.value)} placeholder="Describe brevemente el avance del trabajo." rows={3} value={comment} />
-                    {error && <p className="ry-form-message" role="alert">{error}</p>}
-                    <button className="ry-button ry-button--primary" disabled={saving} type="submit">{saving ? 'Guardando…' : 'Guardar estado'}</button>
+                    <label className="text-[10px] font-bold" htmlFor="detail-comment">Nota del personal (opcional)</label>
+                    <textarea className="min-h-[75px] resize-y rounded-[9px] border border-[var(--ry-line)] bg-[var(--ry-surface)] p-[10px] text-[11px] leading-[1.5] text-[var(--ry-ink)] placeholder:text-[#99aabe]" id="detail-comment" maxLength={300} onChange={(event) => setComment(event.currentTarget.value)} placeholder="Describe brevemente el avance del trabajo." rows={3} value={comment} />
+                    {error && <p className="m-0 rounded-[10px] border border-[#f1c7c7] bg-[#fff4f4] p-[10px] text-[11px] text-[#b42318] dark:border-[#613842] dark:bg-[#30202a] dark:text-[#ffaaaa]" role="alert">{error}</p>}
+                    <button className="min-h-10 rounded-[11px] bg-[var(--ry-blue)] px-3 text-xs font-bold text-white disabled:opacity-60" disabled={saving} type="submit">{saving ? 'Guardando…' : 'Guardar estado'}</button>
                   </form>
                 )}
-                <section className="ry-detail-card ry-timeline-card">
-                  <h2>Historial de seguimiento</h2>
-                  {history.length === 0 ? <p className="ry-timeline-empty">Aún no hay actualizaciones.</p> : (
-                    <ol className="ry-timeline">
+                <section className="rounded-[13px] border border-[#e0e9f4] bg-white p-[15px] dark:border-[var(--ry-card-border)] dark:bg-[var(--ry-surface)]">
+                  <h2 className="mb-[11px] mt-0 text-[13px]">Historial de seguimiento</h2>
+                  {history.length === 0 ? <p className="my-2 text-[11px] text-[var(--ry-muted)]">Aún no hay actualizaciones.</p> : (
+                    <ol className="m-0 grid list-none gap-4 p-0">
                       {history.map((entry) => (
-                        <li key={entry.id}>
-                          <span className="ry-timeline-marker" />
-                          <strong>{historyTitle(entry)}</strong>
-                          <small>{formatDate(entry.changedAt)} · {entry.changedBy}</small>
-                          {entry.comment && <p>{entry.comment}</p>}
+                        <li className="relative grid gap-[5px] pl-5 text-[11px] before:absolute before:bottom-[-16px] before:left-[5px] before:top-2 before:w-px before:bg-[#dce7f3] last:before:hidden dark:before:bg-[#31465b]" key={entry.id}>
+                          <span className="absolute left-0 top-[3px] size-[11px] rounded-full border-2 border-white bg-[#2781e8] shadow-[0_0_0_2px_#dcecff] dark:border-[var(--ry-surface)] dark:shadow-[0_0_0_2px_#29415b]" />
+                          <strong className="text-[var(--ry-ink)]">{historyTitle(entry)}</strong>
+                          <small className="text-[10px] text-[var(--ry-muted)]">{formatDate(entry.changedAt)} · {entry.changedBy}</small>
+                          {entry.comment && <p className="m-0 whitespace-pre-wrap leading-[1.5] text-[var(--ry-muted)]">{entry.comment}</p>}
                         </li>
                       ))}
                     </ol>
@@ -161,17 +163,11 @@ export function ReportDetailScreen({
           </>
         ) : null}
       </main>
-      <nav aria-label="Navegación principal" className="ry-bottom-nav">
-        <button onClick={onOpenHome} type="button"><Icon name="home" /><span>Inicio</span></button>
-        <button aria-current="page" className="is-active" onClick={onOpenReports} type="button"><Icon name="reports" /><span>Reportes</span></button>
-        <button onClick={onOpenSettings} type="button"><Icon name="user" /><span>Mi cuenta</span></button>
-      </nav>
+      <BottomNav items={[
+        { label: 'Inicio', icon: 'home', onClick: onOpenHome },
+        { label: 'Reportes', icon: 'reports', onClick: onOpenReports, active: true },
+        { label: 'Mi cuenta', icon: 'user', onClick: onOpenSettings },
+      ]} />
     </div>
   )
-}
-
-function StatusBadge({ status }: { status: ReportStatus }) {
-  const icon = status === 'Solucionado' ? 'check' : status === 'En atención' ? 'settings' : 'clock'
-
-  return <span className={`ry-status ry-status--${status.replace(' ', '-').toLowerCase()}`}><Icon name={icon} size={12} />{status}</span>
 }
