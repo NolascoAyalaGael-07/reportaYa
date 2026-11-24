@@ -1,49 +1,60 @@
 # ReportaYa
 
-Aplicación para que alumnos reporten problemas de la escuela y el personal les dé seguimiento.
+Sistema web para que la comunidad escolar reporte problemas de infraestructura y consulte su seguimiento.
 
-## Funcionalidades
+**Repositorio:** [github.com/NolascoAyalaGael-07/reportaYa](https://github.com/NolascoAyalaGael-07/reportaYa) | **Curso:** Gestión de Proyectos de Software
+**Equipo:** [Agregar los nombres de las personas integrantes antes de entregar]
 
-- Registro de alumnos e inicio/cierre de sesión.
-- Roles: **alumno**, **mantenimiento** y **administrador**. El registro público siempre crea alumnos.
-- Reportes asociados a su autor, con categoría, ubicación, descripción y fotografía opcional.
-- Consulta de reportes propios para alumnos y bandeja general con búsqueda y filtros para mantenimiento/administración.
-- Cambios de estado con comentario e historial visible para el alumno que creó el reporte.
-- Notificaciones dentro de la aplicación cuando el personal actualiza un reporte; se pueden marcar como leídas.
-- Edición del nombre y cambio de contraseña validando la contraseña actual. El correo y el número de control permanecen inmutables.
-- Asignación y revocación de roles de personal desde la cuenta de administrador.
-- Centro de ayuda con preguntas frecuentes y solicitudes que administración puede revisar y resolver.
-- Preferencia de tema claro u oscuro guardada en el navegador.
-- En **Mi cuenta** se puede editar el nombre, actualizar la contraseña validando la actual, revisar la política de privacidad, consultar notificaciones y administrar preferencias y solicitudes de ayuda.
-- Contraseñas con hash scrypt, sesiones de 8 horas en MySQL y fotografías guardadas en `backend/uploads`.
+## Contenido
 
-Los reportes y las imágenes solo son accesibles con sesión; un alumno únicamente puede consultar los reportes que creó. Las imágenes aceptadas son JPG/PNG de hasta 5 MB.
+- [Descripción y funciones](#descripción-y-funciones)
+- [Tecnologías](#tecnologías)
+- [Requisitos](#requisitos)
+- [Instalación y ejecución](#instalación-y-ejecución)
+- [Base de datos y primer administrador](#base-de-datos-y-primer-administrador)
+- [Pruebas](#pruebas)
+- [Estructura de entrega](#estructura-de-entrega)
+- [Credenciales de prueba](#credenciales-de-prueba)
 
-## Preparar MySQL
+## Descripción y funciones
 
-La base que ya creaste con `database/mysql_setup.sql` conserva tus usuarios y reportes. Ejecuta **una vez** estos scripts en MySQL Workbench para actualizarla sin borrar los datos existentes:
+ReportaYa centraliza avisos sobre problemas escolares y permite dar seguimiento a sus estados. Incluye:
 
-1. `database/mysql_migration_roles.sql`
-2. `database/mysql_migration_auth_sessions.sql`
-3. `database/mysql_migration_report_history.sql`
-4. `database/mysql_migration_report_images.sql`
-5. `database/mysql_migration_account_features.sql`
-5. `database/mysql_migration_account_features.sql`
+- Registro público e inicio de sesión para estudiantes.
+- Creación de reportes con categoría, ubicación, descripción y fotografía JPG/PNG opcional de hasta 5 MB.
+- Consulta de reportes propios por estudiantes y bandeja general para mantenimiento y administración.
+- Búsqueda, filtros por estado, historial de cambios y notas de seguimiento.
+- Personal de mantenimiento creado por un administrador. Los roles no se pueden cambiar desde la aplicación.
+- Reportes solucionados en modo de solo lectura para estudiantes y mantenimiento.
+- Notificaciones dentro de la aplicación con contador y vista emergente.
+- Edición del nombre, cambio de contraseña, preferencias de tema, centro de ayuda y solicitudes de soporte.
 
-Los scripts de migración se pueden volver a ejecutar. Para una instalación nueva, ejecuta solamente `database/mysql_setup.sql`, que crea el esquema completo.
+## Tecnologías
 
-## Crear al primer administrador
+- **Lenguajes:** TypeScript, JavaScript, SQL, HTML y CSS.
+- **Interfaz:** React, Vite y Tailwind CSS.
+- **Servidor:** Node.js, Express y TypeScript.
+- **Persistencia:** MySQL con `mysql2`.
+- **Seguridad:** contraseñas con hash scrypt, sesiones en MySQL y cookies `HttpOnly`.
 
-1. Inicia la aplicación y registra una cuenta normal desde **Crear una cuenta**.
-2. Abre `database/promote_initial_admin.sql`, reemplaza `REEMPLAZA_CON_CORREO_REGISTRADO` por el correo registrado y ejecuta el script.
-3. La cuenta ya puede abrir **Mi cuenta → Gestionar usuarios** y promover otras cuentas registradas a mantenimiento o administración. No hay un selector de rol en el registro público.
+## Requisitos
 
-El script informa `accounts_promoted`: debe mostrar `1`. Si muestra `0`, comprueba el correo y que la cuenta exista antes de continuar.
+- Node.js y npm instalados.
+- MySQL Server y un cliente como MySQL Workbench.
+- Git para clonar el repositorio.
 
-## Configurar y ejecutar
+## Instalación y ejecución
 
-1. Copia `backend/.env.example` a `backend/.env`; completa `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`, `MYSQL_PASSWORD` y `MYSQL_DATABASE`. No subas ni compartas `backend/.env`.
-2. Desde una terminal, inicia el backend:
+1. Clona el repositorio y entra a su carpeta:
+
+   ```powershell
+   git clone https://github.com/NolascoAyalaGael-07/reportaYa.git
+   cd reportaYa
+   ```
+
+2. Crea la base de datos siguiendo [Base de datos y primer administrador](#base-de-datos-y-primer-administrador).
+3. Configura el backend. Copia `backend/.env.example` como `backend/.env` y completa la conexión MySQL. No publiques el archivo `.env`.
+4. En una terminal, inicia el backend:
 
    ```powershell
    cd backend
@@ -51,9 +62,7 @@ El script informa `accounts_promoted`: debe mostrar `1`. Si muestra `0`, comprue
    npm run dev
    ```
 
-   El servidor comprueba la conexión a MySQL antes de aceptar solicitudes. `UPLOADS_DIRECTORY` es opcional; por defecto, las fotografías se guardan en `backend/uploads`, carpeta ignorada por Git.
-
-3. En otra terminal, inicia el frontend:
+5. En otra terminal, desde la raíz del proyecto, inicia el frontend:
 
    ```powershell
    cd frontend
@@ -61,19 +70,64 @@ El script informa `accounts_promoted`: debe mostrar `1`. Si muestra `0`, comprue
    npm run dev
    ```
 
-4. Abre la URL que muestra Vite, normalmente `http://localhost:5173`.
+6. Abre la dirección local que indique Vite, normalmente `http://localhost:5173`.
 
-Vite reenvía `/api` al backend en `http://localhost:3001`. Para esta versión local, frontend y backend se usan bajo el mismo origen. Las sesiones se guardan en MySQL, vencen a las 8 horas y se actualiza el rol efectivo en cada solicitud. Las cookies son `HttpOnly` y `SameSite=Lax`; en producción HTTPS se agrega `Secure`.
+En Windows PowerShell, si la política del equipo bloquea `npm`, usa `npm.cmd` en los mismos comandos. Vite reenvía las solicitudes `/api` al servidor local en el puerto `3001`.
 
-## Pruebas automatizadas
+## Base de datos y primer administrador
+
+Para una instalación nueva, ejecuta una sola vez [`database/mysql_setup.sql`](database/mysql_setup.sql) en MySQL Workbench.
+
+Para actualizar una base existente sin recrearla, ejecuta los scripts de migración en este orden:
+
+1. [`database/mysql_migration_roles.sql`](database/mysql_migration_roles.sql)
+2. [`database/mysql_migration_auth_sessions.sql`](database/mysql_migration_auth_sessions.sql)
+3. [`database/mysql_migration_report_history.sql`](database/mysql_migration_report_history.sql)
+4. [`database/mysql_migration_report_images.sql`](database/mysql_migration_report_images.sql)
+5. [`database/mysql_migration_account_features.sql`](database/mysql_migration_account_features.sql)
+
+El registro público crea cuentas de estudiante. Para preparar la cuenta administradora inicial:
+
+1. Registra la cuenta que se usará como administradora desde la pantalla **Crear una cuenta**.
+2. En [`database/promote_initial_admin.sql`](database/promote_initial_admin.sql), reemplaza el marcador de correo por el correo de esa cuenta.
+3. Ejecuta el script y comprueba el resultado que devuelve.
+4. Inicia sesión con esa cuenta. Desde **Mi cuenta → Gestionar usuarios**, administración puede crear cuentas de mantenimiento.
+
+No se permite cambiar el rol de una cuenta existente desde la aplicación. Mantén las contraseñas y los datos de conexión fuera del repositorio.
+
+## Pruebas
+
+Ejecuta las pruebas automatizadas del servidor:
 
 ```powershell
 cd backend
 npm test
 ```
 
-Las pruebas `.test.ts` se compilan y ejecutan con Node; usan un repositorio en memoria y no necesitan credenciales ni un servidor MySQL. Cubren login, edición de cuenta, roles, privacidad de reportes, cambios de estado, historial, notificaciones, soporte y límites/acceso a fotografías. No sustituyen una prueba de integración con tu instancia MySQL.
+Para compilar la interfaz:
 
-## Alcance del avance
+```powershell
+cd frontend
+npm run build
+```
 
-El backend es Node.js, Express y TypeScript; el frontend es React, TypeScript y Vite. La persistencia está implementada para cuentas, sesiones, reportes, estados, notificaciones y solicitudes de soporte en MySQL. Las fotografías se guardan como archivos en el servidor y MySQL almacena su nombre; realiza respaldos de `backend/uploads` junto con la base. Las notificaciones son internas a la aplicación; no se incluyen correo automático, despliegue público ni recuperación de contraseñas.
+El resumen de las comprobaciones realizadas está en [`07_Pruebas/README.md`](07_Pruebas/README.md). Las pruebas automatizadas del backend usan un repositorio en memoria; no reemplazan una prueba de integración con una instancia MySQL real.
+
+## Estructura de entrega
+
+| Carpeta | Contenido |
+| --- | --- |
+| `01_Codigo_Fuente/` | Índice del código fuente, ubicado en `backend/` y `frontend/`. |
+| `02_Sistema_Ejecutable/` | Instrucciones para ejecutar la aplicación web localmente. |
+| `03_Base_de_Datos/` | Índice de scripts y migraciones, ubicados en `database/`. |
+| `04_Documentacion/` | Descripción técnica y enlaces de instalación. |
+| `05_Manual_de_Usuario/` | Manual paso a paso con capturas anonimizadas. |
+| `06_Evidencias/` | Referencias a evidencias reales del proyecto y su historial Git. |
+| `07_Pruebas/` | Comandos y resultados de las pruebas ejecutadas. |
+| `08_Capturas_de_Pantalla/` | Capturas de la versión final para el manual. |
+
+Se conserva el orden convencional de carpetas del código para facilitar su instalación. `02_Sistema_Ejecutable/` explica cómo poner en marcha esta aplicación web; no se distribuye un instalador `.exe`.
+
+## Credenciales de prueba
+
+El repositorio no incluye credenciales predeterminadas ni cuentas de demostración. Registra un estudiante para probar el flujo público; para probar las funciones administrativas, configura una cuenta inicial siguiendo la sección anterior y crea una cuenta de mantenimiento desde la aplicación.
