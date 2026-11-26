@@ -41,12 +41,12 @@ Los reportes tienen una categoría, ubicación, descripción, fecha y estado: **
 
 - Una computadora con navegador web actualizado.
 - Para ejecutar la aplicación localmente: Node.js, npm y MySQL Server.
-- Conexión MySQL configurada en `backend/.env`; nunca compartas ese archivo.
+- Conexión MySQL configurada en `01_Codigo_Fuente/backend/.env`; nunca compartas ese archivo.
 - Para acceder a funciones administrativas se necesita una cuenta inicial configurada por el equipo.
 
 ## 5. Instalación y acceso
 
-Sigue los pasos del [README principal](../README.md#instalación-y-ejecución): prepara MySQL, configura `backend/.env` e inicia los servidores del backend y frontend. Después, abre `http://localhost:5173`.
+Sigue los pasos del [README principal](../README.md#instalación-y-ejecución): prepara MySQL, configura `01_Codigo_Fuente/backend/.env` e inicia los servidores del backend y frontend. También puedes usar el [lanzador de Windows](../02_Sistema_Ejecutable/README.md). Después, abre `http://localhost:5173`.
 
 En Windows PowerShell, si `npm` está bloqueado por la política de ejecución, usa `npm.cmd`.
 
@@ -167,7 +167,7 @@ En **Mi cuenta → Centro de ayuda**, consulta las preguntas frecuentes o envía
 | Problema | Qué revisar |
 | --- | --- |
 | No carga la aplicación | Confirma que frontend y backend estén iniciados en sus terminales. |
-| No conecta con el servidor | Verifica que MySQL esté activo, revisa `backend/.env` y confirma que el backend escuche en el puerto 3001. |
+| No conecta con el servidor | Verifica que MySQL esté activo, revisa `01_Codigo_Fuente/backend/.env` y confirma que el backend escuche en el puerto 3001. |
 | La cuenta no inicia sesión | Comprueba el correo y contraseña; el registro público debe haberse completado. |
 | No puedo abrir todos los reportes | El acceso depende del rol: estudiantes solo consultan sus propios reportes. |
 | No puedo editar un reporte solucionado | Es el comportamiento esperado para estudiantes y mantenimiento. |

@@ -1,25 +1,43 @@
 # Pruebas y validación
 
-## Pruebas automatizadas del backend
+## Ejecutar y guardar evidencias
 
-Desde `backend/`, ejecuta:
-
-```powershell
-npm test
-```
-
-El comando compila TypeScript y ejecuta los casos automatizados con el repositorio en memoria. Comprueba autenticación y sesiones, edición de cuenta, roles, privacidad, reportes, historial, notificaciones, soporte y validación de fotografías.
-
-## Compilación del frontend
-
-Desde `frontend/`, ejecuta:
+Desde la raíz del repositorio en Windows PowerShell, ejecuta:
 
 ```powershell
-npm run build
+powershell -NoProfile -ExecutionPolicy Bypass -File .\07_Pruebas\run_validation.ps1
 ```
 
-## Última verificación registrada
+El script corre las pruebas automatizadas del backend y compila el frontend. Guarda
+la salida real de cada comando con fecha y hora en `07_Pruebas/resultados/`.
 
-El 24 de noviembre de 2026, `npm test` terminó con **19 pruebas aprobadas y 0 fallidas**. `npm run build` del frontend completó la comprobación de TypeScript y generó la compilación de producción.
+También se pueden ejecutar manualmente:
 
-Estas pruebas automatizadas no sustituyen una prueba de integración contra MySQL ni una revisión manual de todos los flujos en un entorno desplegado.
+```powershell
+cd 01_Codigo_Fuente/backend
+npm.cmd test
+
+cd ..\frontend
+npm.cmd run build
+```
+
+## Alcance automatizado
+
+| Área | Cobertura registrada |
+| --- | --- |
+| Cuenta y sesión | Registro, autenticación, restauración de sesión, validación de contraseña y datos inmutables. |
+| Roles y usuarios | Restricción de roles, privacidad de datos y creación administrativa de cuentas de mantenimiento. |
+| Reportes | Autorización, acceso privado, filtros, estado e historial de seguimiento. |
+| Imágenes | Tipo y tamaño permitidos, acceso autenticado y limpieza de archivos inválidos. |
+| Notificaciones y soporte | Avisos de cambio de estado, lectura de notificaciones y solicitudes de soporte. |
+| Interfaz | Comprobación TypeScript y compilación de producción con Vite. |
+
+Las pruebas del backend usan un repositorio en memoria; no sustituyen una prueba de
+integración con MySQL ni las pruebas manuales realizadas por el equipo.
+
+## Último resultado registrado
+
+El 25 de noviembre de 2026 se ejecutó el script de validación: **19 pruebas del
+backend aprobadas, 0 fallidas**, y compilación del frontend completada. Los registros
+de esa ejecución están en [resultados/](resultados/); son salidas guardadas directamente
+por los comandos, sin reconstruir ni editar para aparentar resultados.

@@ -1,0 +1,38 @@
+﻿Fecha: 2026-11-25 16:21:40 -08:00
+Directorio: 01_Codigo_Fuente\backend
+Comando: npm.cmd test
+
+> reportaya-backend@0.1.0 test
+> npm run build && node --test dist/tests/*.test.js
+
+
+> reportaya-backend@0.1.0 build
+> tsc
+
+✔ actualiza nombre y contraseña sin cambiar correo ni número de control (197.108ms)
+✔ rechaza contraseña actual incorrecta e intentos de cambiar datos inmutables (36.3427ms)
+✔ avisa al alumno cuando cambia el estado y limita lectura a su propia cuenta (239.0459ms)
+✔ crea solicitudes de soporte privadas y permite al administrador resolverlas (5.009ms)
+✔ registro valida los campos requeridos (64.9657ms)
+✔ registro guarda un hash, inicia sesión y protege la sesión con cookie HttpOnly (38.9723ms)
+✔ rechaza correo duplicado y credenciales incorrectas sin revelar cuál falló (37.3014ms)
+✔ el inicio de sesión acepta la contraseña correcta y el endpoint de sesión la restaura (38.2284ms)
+✔ no permite consultar ni crear reportes sin iniciar sesión (232.3729ms)
+✔ impide que un usuario de mantenimiento cree reportes como alumno (33.7417ms)
+✔ crea y consulta reportes persistidos para la sesión (7.1756ms)
+✔ mantiene detalles privados del reporte y permite a mantenimiento actualizar el estado con historial (6.1643ms)
+✔ filtra los reportes solucionados por estado y búsqueda para mantenimiento (0.7678ms)
+✔ almacena imágenes validadas, las sirve solo a usuarios autorizados y limpia archivos inválidos (17.0285ms)
+✔ rechaza imágenes mayores de 5 MB (21.998ms)
+✔ rechaza categoría desconocida y evita crear un reporte inválido (2.1688ms)
+✔ solo administradores pueden consultar usuarios y sus datos no exponen hashes (205.4019ms)
+✔ los roles no se pueden cambiar desde la aplicación (4.5222ms)
+✔ solo administración puede crear cuentas de mantenimiento con credenciales válidas (37.1296ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 693.5207
