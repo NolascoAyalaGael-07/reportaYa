@@ -3,6 +3,8 @@
 **Proyecto:** ReportaYa | **Curso:** Gestión de Proyectos de Software
 **Equipo desarrollador:** [Agregar los nombres oficiales del equipo]
 
+[Descargar el Manual de Usuario en PDF](Manual_de_Usuario_ReportaYa.pdf).
+
 > Las capturas son de la aplicación y se prepararon copias con datos identificables ocultos antes de publicarlas.
 
 ## Índice

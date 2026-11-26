@@ -121,7 +121,7 @@ También puedes ejecutar `powershell -NoProfile -ExecutionPolicy Bypass -File .\
 | `02_Sistema_Ejecutable/` | Lanzador para Windows y guía para iniciar la aplicación web después de configurarla. |
 | `03_Base_de_Datos/` | Scripts SQL para instalación, migraciones y cuenta administradora inicial. |
 | `04_Documentacion/` | Arquitectura, permisos y documentación técnica del sistema. |
-| `05_Manual_de_Usuario/` | Manual ilustrado con instrucciones de uso y solución de problemas. |
+| `05_Manual_de_Usuario/` | Manual ilustrado en Markdown y PDF, con instrucciones de uso y solución de problemas. |
 | `06_Evidencias/` | Captura del entorno ejecutando el sistema e historial verificable del repositorio. |
 | `07_Pruebas/` | Script reproducible, matriz resumida y salidas reales de pruebas/compilación. |
 | `08_Capturas_de_Pantalla/` | Capturas anonimizadas de las pantallas funcionales de ReportaYa. |
