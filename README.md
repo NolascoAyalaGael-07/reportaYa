@@ -120,7 +120,7 @@ También puedes ejecutar `powershell -NoProfile -ExecutionPolicy Bypass -File .\
 | `01_Codigo_Fuente/` | Código fuente completo: backend y frontend, con sus manifiestos y configuraciones. |
 | `02_Sistema_Ejecutable/` | Lanzador para Windows y guía para iniciar la aplicación web después de configurarla. |
 | `03_Base_de_Datos/` | Scripts SQL para instalación, migraciones y cuenta administradora inicial. |
-| `04_Documentacion/` | Arquitectura, permisos y documentación técnica; incluye una guía para exportar el manual a PDF. |
+| `04_Documentacion/` | Arquitectura, permisos y documentación técnica del sistema. |
 | `05_Manual_de_Usuario/` | Manual ilustrado con instrucciones de uso y solución de problemas. |
 | `06_Evidencias/` | Captura del entorno ejecutando el sistema e historial verificable del repositorio. |
 | `07_Pruebas/` | Script reproducible, matriz resumida y salidas reales de pruebas/compilación. |

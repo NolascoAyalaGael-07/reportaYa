@@ -1,6 +1,8 @@
 # Documentación técnica
 
-## Arquitectura
+La descripción técnica ampliada de la solución está en [ARQUITECTURA_TECNICA.md](ARQUITECTURA_TECNICA.md).
+
+## Arquitectura resumida
 
 La solución tiene tres partes:
 
@@ -20,4 +22,4 @@ La solución tiene tres partes:
 - Instalación, variables de entorno y base de datos: [README principal](../README.md).
 - Uso por rol: [Manual de Usuario](../05_Manual_de_Usuario/README.md).
 - Pruebas: [Resultados de Pruebas](../07_Pruebas/README.md).
-- Exportación a PDF: [Instrucciones para generar el manual en PDF con una IA](INSTRUCCIONES_PDF_MANUAL_IA.md).
+- Evidencias de ejecución: [Evidencias del proyecto](../06_Evidencias/README.md).

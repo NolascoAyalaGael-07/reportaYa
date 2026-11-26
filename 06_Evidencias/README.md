@@ -1,10 +1,12 @@
 # Evidencias del proyecto
 
-## Evidencias disponibles en el repositorio
+## Evidencias disponibles
 
-- El [historial de commits](https://github.com/NolascoAyalaGael-07/reportaYa/commits/main) registra cambios concretos de implementación.
-- Las [capturas de pantalla](../08_Capturas_de_Pantalla/) documentan las pantallas de la versión actual y se enlazan desde el [Manual de Usuario](../05_Manual_de_Usuario/README.md).
-- La captura [servidores_locales.png](servidores_locales.png) muestra la salida auténtica de las terminales al iniciar la API y Vite.
-- Los [resultados de pruebas](../07_Pruebas/README.md) incluyen registros guardados directamente de comandos ejecutados sobre este código.
+- **Ejecución local:** [servidores_locales.png](servidores_locales.png) muestra la salida de las terminales de la API y Vite.
+- **Interfaz:** las [capturas anonimizadas](../08_Capturas_de_Pantalla/) muestran las pantallas descritas en el [Manual de Usuario](../05_Manual_de_Usuario/README.md).
+- **Verificación automatizada:** [07_Pruebas/](../07_Pruebas/) contiene el procedimiento reproducible y las salidas de las pruebas backend y compilación frontend.
+- **Historial del desarrollo:** el [historial de commits](https://github.com/NolascoAyalaGael-07/reportaYa/commits/main) permite revisar cambios versionados.
 
-Las copias de las capturas incluidas aquí ocultan información identificable. El historial Git es evidencia del desarrollo registrado en el repositorio. Para completar la entrega del curso, el equipo debe agregar sus bitácoras individuales, cronograma, tareas e incidencias reales; este repositorio no inventa participantes ni actividades.
+Las evidencias automatizadas del backend usan un repositorio en memoria y no acreditan una prueba de integración con MySQL. Las capturas incluidas ocultan información identificable.
+
+Para documentar el proceso del equipo, agreguen únicamente bitácoras, cronogramas, tareas o incidencias que hayan ocurrido realmente. Esos registros no están disponibles en el proyecto y no se inventaron.
