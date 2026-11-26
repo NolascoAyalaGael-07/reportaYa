@@ -63,7 +63,7 @@ const reportSelect = `
 export function createPool(environment: Environment): Pool {
   const { MYSQL_HOST, MYSQL_USER, MYSQL_DATABASE } = environment
   if (!MYSQL_HOST || !MYSQL_USER || !MYSQL_DATABASE) {
-    throw new Error('Configura MYSQL_HOST, MYSQL_USER y MYSQL_DATABASE en backend/.env.')
+    throw new Error('Configura MYSQL_HOST, MYSQL_USER y MYSQL_DATABASE en 01_Codigo_Fuente/backend/.env.')
   }
 
   const port = Number(environment.MYSQL_PORT ?? 3306)

@@ -21,7 +21,7 @@ mono_crash.*
 [Bb]uild/
 [Dd]ist/
 node_modules/
-backend/uploads/
+**/backend/uploads/
 
 # Node.js, React, Vite and TypeScript
 [Nn]pm-debug.log*
